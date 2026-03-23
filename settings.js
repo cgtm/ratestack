@@ -67,16 +67,18 @@ export function renderSettings() {
     return opt;
   }
 
-  if (store.selected.length > 0) {
-    const header = document.createElement('div');
-    header.className = 'text-xs font-semibold text-dim uppercase tracking-widest pb-1.5';
-    header.textContent = 'Selected';
-    list.appendChild(header);
+  const selectedList = document.getElementById('selected-list');
+  selectedList.innerHTML = '';
+  const divider = document.getElementById('selected-divider');
 
+  if (store.selected.length > 0) {
+    divider.classList.remove('hidden');
     store.selected.forEach((code) => {
       const opt = buildOption(code);
-      if (opt) list.appendChild(opt);
+      if (opt) selectedList.appendChild(opt);
     });
+  } else {
+    divider.classList.add('hidden');
   }
 
   CURRENCY_REGIONS.forEach(({ region, codes }) => {
@@ -84,7 +86,7 @@ export function renderSettings() {
     if (unselected.length === 0) return;
 
     const header = document.createElement('div');
-    header.className = 'text-xs font-semibold text-dim uppercase tracking-widest pt-4 pb-1.5';
+    header.className = 'text-xs font-semibold text-dim uppercase tracking-widest pt-4 pb-1.5 first:pt-0';
     header.textContent = region;
     list.appendChild(header);
 
