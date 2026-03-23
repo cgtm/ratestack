@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f0f1a">
+  <title>RateStack</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0f0f1a',
+            surface: '#1a1a2e',
+            brd: '#2a2a4a',
+            main: '#e8e8f0',
+            dim: '#8888aa',
+            accent: '#6c63ff',
+          },
+          boxShadow: {
+            'accent-glow': '0 0 0 3px rgba(108, 99, 255, 0.25)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-full bg-bg text-main antialiased overflow-x-hidden">
+  <div id="app" class="max-w-[480px] mx-auto px-5 pt-4 pb-10 min-h-screen">
+    <header class="flex items-center justify-between pt-3 pb-2">
+      <h1 class="text-[26px] font-bold tracking-[-0.5px] gradient-text">RateStack</h1>
+      <button id="settings-btn" class="bg-transparent border-none text-dim cursor-pointer p-2 rounded-[10px] transition-colors flex items-center justify-center hover:bg-surface hover:text-main" aria-label="Settings">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </header>
+
+    <div id="rate-info" class="flex items-center justify-between pt-1 pb-4">
+      <span id="rate-timestamp" class="text-xs text-dim"></span>
+      <button id="refresh-btn" class="bg-transparent border-none text-dim cursor-pointer p-2 rounded-[10px] transition-colors flex items-center justify-center hover:bg-surface hover:text-main" aria-label="Refresh rates">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+    </div>
+
+    <main id="converter" class="flex flex-col gap-3">
+    </main>
+
+    <div id="settings-overlay" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-lg flex items-end justify-center overlay-transition opacity-0 invisible pointer-events-none">
+      <div id="settings-panel" class="bg-surface rounded-t-[20px] w-full max-w-[480px] max-h-[80vh] flex flex-col px-5 pt-6 panel-transition translate-y-full">
+        <div class="flex items-center justify-between mb-1 shrink-0">
+          <h2 class="text-xl font-bold">Currencies</h2>
+          <button id="settings-close" class="bg-transparent border-none text-dim cursor-pointer p-2 rounded-[10px] flex items-center hover:text-main" aria-label="Close settings">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="flex items-baseline justify-between mb-4 shrink-0">
+          <p class="settings-hint text-[13px] text-dim">Select 2–5 currencies</p>
+          <span id="settings-count" class="text-[13px] text-dim"></span>
+        </div>
+        <div id="currency-list" class="flex flex-col gap-1.5 overflow-y-auto overscroll-contain pb-6"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
