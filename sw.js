@@ -1,8 +1,8 @@
-const CACHE_NAME = 'ratestack-v7';
+const CACHE_NAME = 'ratestack-v8';
 const STATIC_ASSETS = [
-  '/', '/index.html', '/style.css', '/manifest.json',
-  '/app.js', '/currencies.js', '/state.js', '/api.js',
-  '/converter.js', '/drag.js', '/settings.js',
+  './', './index.html', './style.css', './manifest.json',
+  './app.js', './currencies.js', './state.js', './api.js',
+  './converter.js', './drag.js', './settings.js',
 ];
 
 self.addEventListener('install', (e) => {
