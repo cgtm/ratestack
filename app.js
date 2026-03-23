@@ -13,7 +13,19 @@ document.getElementById('settings-overlay').addEventListener('click', (e) => {
 document.getElementById('refresh-btn').addEventListener('click', fetchRates);
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'activated') {
+          window.location.reload();
+        }
+      });
+    });
+
+    // Check for updates on every launch
+    reg.update();
+  });
 }
 
 if (store.selected.length < 2) {
