@@ -5,6 +5,7 @@ export const store = {
   rates: {},
   baseCurrency: '',
   baseAmount: '',
+  theme: 'default',
 };
 
 export function loadState() {
@@ -13,12 +14,18 @@ export function loadState() {
     if (saved && saved.selected && saved.selected.length >= 0) {
       store.selected = saved.selected;
     }
+    if (saved && saved.theme) {
+      store.theme = saved.theme;
+    }
   } catch {}
   store.baseCurrency = store.selected[0] || '';
 }
 
 export function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ selected: store.selected }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    selected: store.selected,
+    theme: store.theme,
+  }));
 }
 
 const NO_DECIMALS = ['KRW', 'JPY', 'CLP', 'VND', 'IDR', 'UGX', 'TZS', 'HUF', 'ISK', 'COP', 'PYG'];

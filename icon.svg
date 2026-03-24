@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="92" fill="#0f0f1a"/>
+
+  <rect x="102" y="102" width="308" height="38" rx="19" fill="#6c63ff"/>
+  <rect x="133" y="166" width="246" height="38" rx="19" fill="#8b7fff"/>
+  <rect x="164" y="230" width="184" height="38" rx="19" fill="#a78bfa"/>
+
+  <text x="256" y="400" text-anchor="middle" fill="#e8e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-weight="600" font-size="100" letter-spacing="16">&#xA3; &#x20A9; $</text>
+</svg>

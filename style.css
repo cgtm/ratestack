@@ -1,10 +1,22 @@
+:root {
+  --color-bg: #0f0f1a;
+  --color-surface: #1a1a2e;
+  --color-brd: #2a2a4a;
+  --color-main: #e8e8f0;
+  --color-dim: #8888aa;
+  --color-accent: #6c63ff;
+  --color-accent-secondary: #a78bfa;
+  --color-accent-glow: rgba(108, 99, 255, 0.25);
+  --color-accent-bg: rgba(108, 99, 255, 0.08);
+}
+
 body {
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
