@@ -65,7 +65,7 @@ export function initDragAndDrop(container) {
     const origTop = parseFloat(dragCard.style.top);
     dragCard.style.transform = `translateY(${offsetY}px) scale(1.03)`;
 
-    const dragMid = origTop + offsetY + parseFloat(dragCard.style.height || dragCard.getBoundingClientRect().height) / 2;
+    const dragMid = origTop + offsetY + dragCard.getBoundingClientRect().height / 2;
 
     const placeholderIdx = [...container.children].indexOf(placeholder);
 
@@ -120,4 +120,21 @@ export function initDragAndDrop(container) {
 
   container.addEventListener('touchstart', onStart, { passive: false });
   container.addEventListener('mousedown', onStart);
+
+  container.addEventListener('keydown', (e) => {
+    if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    const card = e.target.closest('.currency-card');
+    if (!card || !container.contains(card)) return;
+    e.preventDefault();
+    if (e.key === 'ArrowUp') {
+      const prev = card.previousElementSibling;
+      if (prev) container.insertBefore(card, prev);
+    } else {
+      const next = card.nextElementSibling;
+      if (next) container.insertBefore(next, card);
+    }
+    store.selected = [...container.querySelectorAll('.currency-card')].map((c) => c.dataset.code);
+    saveState();
+    updateRateLabels();
+  });
 }

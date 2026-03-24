@@ -1,6 +1,6 @@
 export const CURRENCY_REGIONS = [
   { region: 'Popular', codes: ['USD', 'EUR', 'GBP', 'JPY', 'KRW', 'AUD', 'CAD', 'CHF', 'CNY'] },
-  { region: 'Europe', codes: ['SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'ISK', 'RUB', 'UAH', 'HRK'] },
+  { region: 'Europe', codes: ['SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'ISK', 'RUB', 'UAH'] },
   { region: 'East Asia', codes: ['HKD', 'TWD', 'MOP'] },
   { region: 'North America', codes: ['MXN'] },
   { region: 'South America', codes: ['BRL', 'ARS', 'CLP', 'COP', 'PEN', 'UYU'] },
@@ -38,7 +38,6 @@ export const CURRENCIES = {
   ISK: { flag: '\u{1F1EE}\u{1F1F8}', name: 'Icelandic Kr\u00F3na', symbol: 'kr' },
   RUB: { flag: '\u{1F1F7}\u{1F1FA}', name: 'Russian Ruble', symbol: '\u20BD' },
   UAH: { flag: '\u{1F1FA}\u{1F1E6}', name: 'Ukrainian Hryvnia', symbol: '\u20B4' },
-  HRK: { flag: '\u{1F1ED}\u{1F1F7}', name: 'Croatian Kuna', symbol: 'kn' },
   // Middle East
   TRY: { flag: '\u{1F1F9}\u{1F1F7}', name: 'Turkish Lira', symbol: '\u20BA' },
   ILS: { flag: '\u{1F1EE}\u{1F1F1}', name: 'Israeli Shekel', symbol: '\u20AA' },
