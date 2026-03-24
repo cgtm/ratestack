@@ -87,6 +87,62 @@ export const THEMES = {
       'accent-bg': 'rgba(0, 168, 132, 0.06)',
     },
   },
+  forest: {
+    label: 'Forest Dark',
+    colors: {
+      bg: '#0c1410',
+      surface: '#142018',
+      brd: '#2a3d32',
+      main: '#e8f0ec',
+      dim: '#6b8f7a',
+      accent: '#22c55e',
+      'accent-secondary': '#84cc16',
+      'accent-glow': 'rgba(34, 197, 94, 0.25)',
+      'accent-bg': 'rgba(34, 197, 94, 0.08)',
+    },
+  },
+  'forest-light': {
+    label: 'Forest Light',
+    colors: {
+      bg: '#f4faf6',
+      surface: '#ffffff',
+      brd: '#c5ddd0',
+      main: '#142818',
+      dim: '#5a7a68',
+      accent: '#16a34a',
+      'accent-secondary': '#65a30d',
+      'accent-glow': 'rgba(22, 163, 74, 0.2)',
+      'accent-bg': 'rgba(22, 163, 74, 0.06)',
+    },
+  },
+  ember: {
+    label: 'Ember Dark',
+    colors: {
+      bg: '#140f0d',
+      surface: '#221a16',
+      brd: '#3d2e28',
+      main: '#f5ebe8',
+      dim: '#a89088',
+      accent: '#f97316',
+      'accent-secondary': '#ef4444',
+      'accent-glow': 'rgba(249, 115, 22, 0.25)',
+      'accent-bg': 'rgba(249, 115, 22, 0.08)',
+    },
+  },
+  'ember-light': {
+    label: 'Ember Light',
+    colors: {
+      bg: '#fffaf5',
+      surface: '#ffffff',
+      brd: '#e8d5c8',
+      main: '#2c1810',
+      dim: '#8b6f63',
+      accent: '#ea580c',
+      'accent-secondary': '#dc2626',
+      'accent-glow': 'rgba(234, 88, 12, 0.2)',
+      'accent-bg': 'rgba(234, 88, 12, 0.06)',
+    },
+  },
 };
 
 export function applyTheme(name) {
