@@ -21,7 +21,9 @@ jobs:
           chmod +x tailwindcss-linux-x64
 
       - name: Build Tailwind CSS
-        run: ./tailwindcss-linux-x64 -i src/styles.css -o style.css --minify
+        run: |
+          ./tailwindcss-linux-x64 -i src/styles.css -o style.css --minify
+          rm tailwindcss-linux-x64
 
       - name: Stamp service worker with commit hash
         run: sed -i "s/ratestack-v[0-9]*/ratestack-${GITHUB_SHA::7}/" sw.js
