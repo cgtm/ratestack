@@ -7,7 +7,11 @@ export default {
   'settings.hintMore': 'कम से कम {{count}} और चुनें',
   'empty.message': 'शुरू करने के लिए 2 से 5 मुद्राएँ चुनें।',
   'empty.link': 'सेटिंग्स खोलें',
-  'rates.updated': 'दरें अपडेट {{time}}',
+  'rates.updatedRelative': '{{relative}}',
+  'rates.pending': 'दरों की प्रतीक्षा…',
+  'rates.disclaimer':
+    'संकेतक मध्य बाज़ार दरें केवल जानकारी के लिए—वित्तीय सलाह नहीं।',
+  'rates.offline': 'आप ऑफ़लाइन हैं। पिछली सहेजी दरें दिख सकती हैं।',
   'rate.display': '1 {{from}} = {{value}} {{to}}',
   'theme.section': 'थीम',
   'theme.default': 'डिफ़ॉल्ट डार्क',
@@ -26,6 +30,7 @@ export default {
   'aria.close': 'सेटिंग्स बंद करें',
   'aria.amount': 'राशि',
   'aria.removeCurrency': '{{code}} हटाएँ',
+  'aria.copyValue': '{{code}} राशि कॉपी करें',
   'aria.dragReorder': 'क्रम बदलें — खींचें या Alt+तीर',
   'settings.langCount': '{{count}} भाषाएँ',
   'settings.themeCount': '{{count}} थीम',
@@ -36,6 +41,7 @@ export default {
   'update.reload': 'रीलोड करें',
   'card.remove': 'हटाएँ',
   'card.removing': 'हटाया जा रहा है',
+  'card.copied': 'कॉपी हो गया',
 
   'region.Popular': 'लोकप्रिय',
   'region.North America': 'उत्तरी अमेरिका',

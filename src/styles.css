@@ -49,3 +49,62 @@ body.dragging {
   user-select: none;
   -webkit-user-select: none;
 }
+
+/** Immediate click feedback on the rates refresh control (before network / spin). */
+@keyframes refresh-tap-ack {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  45% {
+    transform: scale(0.9);
+    background-color: var(--color-accent-bg);
+    box-shadow: 0 0 0 2px var(--color-accent-glow);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+#refresh-btn.refresh-tap-anim {
+  animation: refresh-tap-ack 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #refresh-btn.refresh-tap-anim {
+    animation: none;
+  }
+}
+
+/** Copy control: immediate tap + brief success tint (with haptic / aria). */
+@keyframes card-copy-tap-ack {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  45% {
+    transform: scale(0.9);
+    background-color: var(--color-accent-bg);
+    box-shadow: 0 0 0 2px var(--color-accent-glow);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.card-copy.card-copy-tap-anim {
+  animation: card-copy-tap-ack 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-copy.card-copy-done {
+  color: var(--color-accent);
+  background-color: var(--color-accent-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-copy.card-copy-tap-anim {
+    animation: none;
+  }
+}

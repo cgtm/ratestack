@@ -6,11 +6,13 @@
 import { CURRENCIES } from './currencies.js';
 import { store, saveState, getRateDisplay, parseLocaleAmountString, normalizeTypingAmount } from './state.js';
 import { recalculate, updateRateLabels, fetchRatesIfNeeded } from './api.js';
+import { hapticSuccess } from './haptics.js';
 import { initDragAndDrop } from './drag.js';
 import { initSwipeToDismiss } from './swipe.js';
 import { currencyName, t } from './i18n.js';
 
 const CLOSE_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+const COPY_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 const GRIP_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>`;
 
 const CARD_BASE = 'currency-card border rounded-2xl transition-[border-color,box-shadow] duration-200 relative overflow-hidden';
@@ -35,6 +37,7 @@ function removeCurrency(code) {
 
 export function renderConverter() {
   document.getElementById('rate-info').classList.remove('hidden');
+  document.getElementById('rate-disclaimer')?.classList.remove('hidden');
   const container = document.getElementById('converter');
   container.innerHTML = '';
 
@@ -64,9 +67,14 @@ export function renderConverter() {
               <span class="text-xs text-dim font-normal ml-1">${currencyName(code)}</span>
             </div>
           </div>
-          <button type="button" class="card-close text-dim/60 hover:text-main transition-colors p-1 -mr-1" aria-label="${t('aria.removeCurrency', { code })}">
-            ${CLOSE_SVG}
-          </button>
+          <div class="flex items-center shrink-0 gap-0.5">
+            <button type="button" class="card-copy rounded-md text-dim/60 hover:text-main transition-[color,background-color,box-shadow] duration-200 p-1" aria-label="${t('aria.copyValue', { code })}">
+              ${COPY_SVG}
+            </button>
+            <button type="button" class="card-close text-dim/60 hover:text-main transition-colors p-1 -mr-1" aria-label="${t('aria.removeCurrency', { code })}">
+              ${CLOSE_SVG}
+            </button>
+          </div>
         </div>
         <div class="flex items-baseline gap-1">
           <span class="text-[32px] font-semibold text-dim select-none">${info.symbol}</span>
@@ -112,6 +120,39 @@ export function renderConverter() {
 
     card.querySelector('.card-close').addEventListener('click', () => removeCurrency(code));
 
+    card.querySelector('.card-copy').addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const inp = card.querySelector('.currency-input');
+      const sym = info.symbol;
+      const raw = (inp?.value || '').trim();
+      const text = raw ? `${sym}${raw}` : `${sym}`;
+      const copyBtn = ev.currentTarget;
+      const copyLabel = () => t('aria.copyValue', { code });
+
+      copyBtn.classList.remove('card-copy-tap-anim');
+      void copyBtn.offsetWidth;
+      copyBtn.classList.add('card-copy-tap-anim');
+      const endTap = () => {
+        copyBtn.classList.remove('card-copy-tap-anim');
+        copyBtn.removeEventListener('animationend', endTap);
+      };
+      copyBtn.addEventListener('animationend', endTap);
+
+      const done = () => {
+        hapticSuccess();
+        copyBtn.classList.add('card-copy-done');
+        clearTimeout(copyBtn._copyDoneTimer);
+        copyBtn._copyDoneTimer = setTimeout(() => {
+          copyBtn.classList.remove('card-copy-done');
+        }, 1500);
+        copyBtn.setAttribute('aria-label', t('card.copied'));
+        setTimeout(() => copyBtn.setAttribute('aria-label', copyLabel()), 1500);
+      };
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => {});
+      }
+    });
+
     container.appendChild(card);
   });
 
@@ -123,6 +164,7 @@ export function renderConverter() {
 
 export function renderEmptyState() {
   document.getElementById('rate-info').classList.add('hidden');
+  document.getElementById('rate-disclaimer')?.classList.add('hidden');
   const container = document.getElementById('converter');
   container.innerHTML = '';
 
@@ -146,13 +188,52 @@ export function renderEmptyState() {
 }
 
 export function renderLoadingState() {
+  document.getElementById('rate-info')?.classList.remove('hidden');
+  document.getElementById('rate-disclaimer')?.classList.remove('hidden');
+  const ts = document.getElementById('rate-timestamp');
+  if (ts) ts.textContent = t('rates.pending');
   const container = document.getElementById('converter');
   container.innerHTML = '';
   const wrap = document.createElement('div');
-  wrap.className = 'flex flex-col items-center justify-center py-16 gap-3 text-dim';
-  wrap.innerHTML = `
-    <div class="w-8 h-8 border-2 border-brd border-t-accent rounded-full animate-spin" aria-hidden="true"></div>
-    <p class="text-sm">${t('rates.loading')}</p>
-  `;
+  wrap.className = 'flex flex-col gap-3 w-full';
+  wrap.setAttribute('aria-busy', 'true');
+  wrap.setAttribute('aria-label', t('rates.loading'));
+
+  const n = Math.max(2, Math.min(store.selected.length || 3, 5));
+  for (let i = 0; i < n; i++) {
+    const sk = document.createElement('div');
+    sk.className =
+      'rounded-2xl border border-brd bg-surface px-[18px] py-4 animate-pulse';
+    sk.setAttribute('aria-hidden', 'true');
+    sk.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded bg-brd/80"></div>
+            <div class="space-y-1.5">
+              <div class="h-4 w-14 rounded bg-brd/80"></div>
+              <div class="h-3 w-24 rounded bg-brd/60"></div>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-1">
+          <div class="w-8 h-8 rounded bg-brd/60"></div>
+          <div class="w-8 h-8 rounded bg-brd/60"></div>
+        </div>
+      </div>
+      <div class="flex items-baseline gap-1">
+        <div class="h-4 w-6 rounded bg-brd/60"></div>
+        <div class="h-9 flex-1 rounded bg-brd/50"></div>
+      </div>
+      <div class="h-3 w-32 rounded bg-brd/40 mt-3"></div>
+    `;
+    wrap.appendChild(sk);
+  }
+
+  const hint = document.createElement('p');
+  hint.className = 'text-center text-xs text-dim pt-1';
+  hint.textContent = t('rates.loading');
+  wrap.appendChild(hint);
+
   container.appendChild(wrap);
 }

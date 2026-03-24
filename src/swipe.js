@@ -1,6 +1,8 @@
+import { hapticCommit } from './haptics.js';
+
 /**
  * Horizontal swipe on the card body removes a currency; vertical intent is ignored so scrolling
- * still works. Ignores starts on grip, input, and close to avoid fighting drag and typing.
+ * still works. Ignores starts on grip, input, copy, and close to avoid fighting drag and typing.
  * Threshold is 40% of card width; background interpolates toward red as the user approaches commit.
  */
 export function initSwipeToDismiss(container, onRemove) {
@@ -21,7 +23,7 @@ export function initSwipeToDismiss(container, onRemove) {
   }
 
   function onStart(e) {
-    if (e.target.closest('.drag-handle, input, .card-close')) return;
+    if (e.target.closest('.drag-handle, input, .card-close, .card-copy')) return;
     const card = e.target.closest('.currency-card');
     if (!card) return;
 
@@ -85,6 +87,7 @@ export function initSwipeToDismiss(container, onRemove) {
     const code = activeCard.dataset.code;
 
     if (Math.abs(currentX) > threshold) {
+      hapticCommit();
       content.style.transition = 'transform 0.2s ease-out';
       content.style.transform = 'translateX(-100%)';
       setTimeout(() => onRemove(code), 200);
