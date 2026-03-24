@@ -2,7 +2,7 @@ import { CURRENCIES } from './currencies.js';
 import { store, getRateDisplay } from './state.js';
 import { recalculate, updateRateLabels } from './api.js';
 import { initDragAndDrop } from './drag.js';
-import { currencyName } from './i18n.js';
+import { currencyName, t } from './i18n.js';
 
 const CARD_BASE = 'currency-card bg-surface border rounded-2xl px-[18px] py-4 transition-[border-color,box-shadow] duration-200 relative';
 const CARD_ACTIVE = 'border-accent shadow-accent-glow';
@@ -13,6 +13,7 @@ const INACTIVE_CLASSES = CARD_INACTIVE.split(' ');
 const GRIP_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>`;
 
 export function renderConverter() {
+  document.getElementById('rate-info').classList.remove('hidden');
   const container = document.getElementById('converter');
   container.innerHTML = '';
 
@@ -80,4 +81,28 @@ export function renderConverter() {
 
   recalculate();
   initDragAndDrop(container);
+}
+
+export function renderEmptyState() {
+  document.getElementById('rate-info').classList.add('hidden');
+  const container = document.getElementById('converter');
+  container.innerHTML = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'flex flex-col items-center justify-center text-center py-20 gap-3';
+
+  const msg = document.createElement('p');
+  msg.className = 'text-dim text-[15px] leading-relaxed';
+  msg.textContent = t('empty.message');
+
+  const link = document.createElement('button');
+  link.className = 'text-accent font-semibold text-[15px] underline underline-offset-2 cursor-pointer bg-transparent border-none';
+  link.textContent = t('empty.link');
+  link.addEventListener('click', () => {
+    document.getElementById('settings-btn').click();
+  });
+
+  wrapper.appendChild(msg);
+  wrapper.appendChild(link);
+  container.appendChild(wrapper);
 }

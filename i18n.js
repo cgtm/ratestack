@@ -13,6 +13,8 @@ const translations = {
     'settings.title': 'Currencies',
     'settings.hint': 'Select 2\u20135 currencies',
     'settings.hintMore': 'Select at least {{count}} more',
+    'empty.message': 'Select between 2 and 5 currencies to get started.',
+    'empty.link': 'Open settings',
     'rates.updated': 'Rates updated {{time}}',
     'rate.display': '1 {{from}} = {{value}} {{to}}',
     'theme.section': 'Theme',
@@ -23,6 +25,7 @@ const translations = {
     'aria.refresh': 'Refresh rates',
     'aria.close': 'Close settings',
 
+    'region.Popular': 'Popular',
     'region.North America': 'North America',
     'region.South America': 'South America',
     'region.Europe': 'Europe',
@@ -101,6 +104,8 @@ const translations = {
     'settings.title': '\uD1B5\uD654',
     'settings.hint': '\uD1B5\uD654 2~5\uAC1C\uB97C \uC120\uD0DD\uD558\uC138\uC694',
     'settings.hintMore': '{{count}}\uAC1C \uB354 \uC120\uD0DD\uD558\uC138\uC694',
+    'empty.message': '\uD1B5\uD654 2~5\uAC1C\uB97C \uC120\uD0DD\uD558\uC5EC \uC2DC\uC791\uD558\uC138\uC694.',
+    'empty.link': '\uC124\uC815 \uC5F4\uAE30',
     'rates.updated': '\uD658\uC728 \uC5C5\uB370\uC774\uD2B8 {{time}}',
     'rate.display': '1 {{from}} = {{value}} {{to}}',
     'theme.section': '\uD14C\uB9C8',
@@ -111,6 +116,7 @@ const translations = {
     'aria.refresh': '\uD658\uC728 \uC0C8\uB85C\uACE0\uCE68',
     'aria.close': '\uC124\uC815 \uB2EB\uAE30',
 
+    'region.Popular': '\uC778\uAE30',
     'region.North America': '\uBD81\uBBF8',
     'region.South America': '\uB0A8\uBBF8',
     'region.Europe': '\uC720\uB7FD',

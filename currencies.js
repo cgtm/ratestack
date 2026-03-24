@@ -1,13 +1,14 @@
 export const CURRENCY_REGIONS = [
-  { region: 'North America', codes: ['USD', 'CAD', 'MXN'] },
+  { region: 'Popular', codes: ['USD', 'EUR', 'GBP', 'JPY', 'KRW', 'AUD', 'CAD', 'CHF', 'CNY'] },
+  { region: 'Europe', codes: ['SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'ISK', 'RUB', 'UAH', 'HRK'] },
+  { region: 'East Asia', codes: ['HKD', 'TWD', 'MOP'] },
+  { region: 'North America', codes: ['MXN'] },
   { region: 'South America', codes: ['BRL', 'ARS', 'CLP', 'COP', 'PEN', 'UYU'] },
-  { region: 'Europe', codes: ['EUR', 'GBP', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'ISK', 'RUB', 'UAH', 'HRK'] },
-  { region: 'Middle East', codes: ['TRY', 'ILS', 'AED', 'SAR', 'QAR', 'KWD', 'BHD', 'OMR', 'JOD'] },
-  { region: 'Africa', codes: ['ZAR', 'NGN', 'KES', 'EGP', 'MAD', 'GHS', 'TZS', 'UGX', 'ETB'] },
-  { region: 'East Asia', codes: ['JPY', 'KRW', 'CNY', 'HKD', 'TWD', 'MOP'] },
   { region: 'South Asia', codes: ['INR', 'PKR', 'BDT', 'LKR', 'NPR'] },
   { region: 'Southeast Asia', codes: ['SGD', 'THB', 'MYR', 'IDR', 'PHP', 'VND'] },
-  { region: 'Oceania', codes: ['AUD', 'NZD', 'FJD'] },
+  { region: 'Middle East', codes: ['TRY', 'ILS', 'AED', 'SAR', 'QAR', 'KWD', 'BHD', 'OMR', 'JOD'] },
+  { region: 'Africa', codes: ['ZAR', 'NGN', 'KES', 'EGP', 'MAD', 'GHS', 'TZS', 'UGX', 'ETB'] },
+  { region: 'Oceania', codes: ['NZD', 'FJD'] },
 ];
 
 export const CURRENCIES = {
