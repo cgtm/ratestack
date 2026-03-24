@@ -5,7 +5,7 @@
  */
 import { CURRENCIES, CURRENCY_REGIONS } from './currencies.js';
 import { store, saveState } from './state.js';
-import { fetchRates } from './api.js';
+import { fetchRates, updateTimestamp } from './api.js';
 import { renderConverter, renderEmptyState } from './converter.js';
 import { THEMES, applyTheme } from './theme.js';
 import { t, currencyName, regionName, LANGUAGES, setLang } from './i18n.js';
@@ -179,6 +179,11 @@ export function updateSettingsLabels() {
   document.getElementById('settings-close')?.setAttribute('aria-label', t('aria.close'));
   document.getElementById('settings-btn')?.setAttribute('aria-label', t('aria.settings'));
   document.getElementById('refresh-btn')?.setAttribute('aria-label', t('aria.refresh'));
+
+  const disc = document.getElementById('rate-disclaimer');
+  if (disc) disc.textContent = t('rates.disclaimer');
+
+  updateTimestamp();
 }
 
 function langOptionHTML(lang) {

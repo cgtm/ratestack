@@ -7,7 +7,11 @@ export default {
   'settings.hintMore': '{{count}}개 더 선택하세요',
   'empty.message': '통화 2~5개를 선택하여 시작하세요.',
   'empty.link': '설정 열기',
-  'rates.updated': '환율 업데이트 {{time}}',
+  'rates.updatedRelative': '{{relative}}',
+  'rates.pending': '환율 대기 중…',
+  'rates.disclaimer':
+    '참고용 중간 시장 환율이며 투자 조언이 아닙니다.',
+  'rates.offline': '오프라인입니다. 마지막으로 저장된 환율이 표시될 수 있습니다.',
   'rate.display': '1 {{from}} = {{value}} {{to}}',
   'theme.section': '테마',
   'theme.default': '기본 다크',
@@ -26,6 +30,7 @@ export default {
   'aria.close': '설정 닫기',
   'aria.amount': '금액',
   'aria.removeCurrency': '{{code}} 제거',
+  'aria.copyValue': '{{code}} 금액 복사',
   'aria.dragReorder': '순서 변경 — 드래그 또는 Alt+방향키',
   'settings.langCount': '언어 {{count}}개',
   'settings.themeCount': '테마 {{count}}개',
@@ -36,6 +41,7 @@ export default {
   'update.reload': '새로고침',
   'card.remove': '제거',
   'card.removing': '제거 중',
+  'card.copied': '복사됨',
 
   'region.Popular': '인기',
   'region.North America': '북미',

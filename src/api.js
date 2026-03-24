@@ -5,6 +5,7 @@
  */
 import { store, formatNumber, getRateDisplay } from './state.js';
 import { t, numberLocale } from './i18n.js';
+import { hapticSuccess } from './haptics.js';
 
 const API_BASE = 'https://open.er-api.com/v6/latest';
 const STALE_MS = 60 * 60 * 1000;
@@ -22,13 +23,38 @@ function pruneRatesExcept(base) {
   });
 }
 
+/** Human-readable “2 min ago” using Intl (locale matches app language). */
+function formatRelativeSince(ms) {
+  const rtf = new Intl.RelativeTimeFormat(numberLocale(), { numeric: 'auto' });
+  const diffSec = Math.max(0, Math.floor((Date.now() - ms) / 1000));
+  if (diffSec < 60) return rtf.format(-diffSec, 'second');
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return rtf.format(-diffMin, 'minute');
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return rtf.format(-diffHr, 'hour');
+  const diffDay = Math.floor(diffHr / 24);
+  return rtf.format(-diffDay, 'day');
+}
+
 export function updateRateStatusUI() {
   const staleEl = document.getElementById('rate-stale');
   const errEl = document.getElementById('rate-error');
+  const offlineEl = document.getElementById('rate-offline');
   const refreshBtn = document.getElementById('refresh-btn');
   if (!staleEl || !errEl) return;
 
-  if (store.ratesFetchError) {
+  const online = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+  if (offlineEl) {
+    if (!online && store.selected.length >= 2) {
+      offlineEl.textContent = t('rates.offline');
+      offlineEl.classList.remove('hidden');
+    } else {
+      offlineEl.classList.add('hidden');
+    }
+  }
+
+  if (store.ratesFetchError && online) {
     errEl.textContent = t('rates.error');
     errEl.classList.remove('hidden');
   } else {
@@ -99,6 +125,7 @@ export async function fetchRates() {
     pruneRatesExcept(base);
     store.ratesLastSuccessAt = Date.now();
     store.ratesFetchError = false;
+    hapticSuccess();
     updateTimestamp();
     recalculate();
     updateRateLabels();
@@ -116,9 +143,13 @@ export async function fetchRates() {
 export function updateTimestamp() {
   const el = document.getElementById('rate-timestamp');
   if (!el) return;
-  const now = new Date();
-  const time = now.toLocaleTimeString(numberLocale(), { hour: '2-digit', minute: '2-digit' });
-  el.textContent = t('rates.updated', { time });
+  const ms = store.ratesLastSuccessAt;
+  if (ms == null) {
+    el.textContent = t('rates.pending');
+    return;
+  }
+  const relative = formatRelativeSince(ms);
+  el.textContent = t('rates.updatedRelative', { relative });
 }
 
 /**

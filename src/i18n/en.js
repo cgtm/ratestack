@@ -7,7 +7,11 @@ export default {
   'settings.hintMore': 'Select at least {{count}} more',
   'empty.message': 'Select between 2 and 5 currencies to get started.',
   'empty.link': 'Open settings',
-  'rates.updated': 'Rates updated {{time}}',
+  'rates.updatedRelative': 'Updated {{relative}}',
+  'rates.pending': 'Waiting for rates…',
+  'rates.disclaimer':
+    'Indicative mid-market rates for information only—not financial advice.',
+  'rates.offline': 'You are offline. Last saved rates may be shown.',
   'rate.display': '1 {{from}} = {{value}} {{to}}',
   'theme.section': 'Theme',
   'theme.default': 'Default Dark',
@@ -26,6 +30,7 @@ export default {
   'aria.close': 'Close settings',
   'aria.amount': 'amount',
   'aria.removeCurrency': 'Remove {{code}}',
+  'aria.copyValue': 'Copy {{code}} amount',
   'aria.dragReorder': 'Reorder — drag or Alt+arrow keys',
   'settings.langCount': '{{count}} languages',
   'settings.themeCount': '{{count}} themes',
@@ -36,6 +41,7 @@ export default {
   'update.reload': 'Reload',
   'card.remove': 'Remove',
   'card.removing': 'Removing',
+  'card.copied': 'Copied',
 
   'region.Popular': 'Popular',
   'region.North America': 'North America',

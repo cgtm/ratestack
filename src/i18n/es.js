@@ -7,7 +7,11 @@ export default {
   'settings.hintMore': 'Selecciona al menos {{count}} más',
   'empty.message': 'Selecciona entre 2 y 5 monedas para comenzar.',
   'empty.link': 'Abrir ajustes',
-  'rates.updated': 'Tasas actualizadas {{time}}',
+  'rates.updatedRelative': 'Actualizado {{relative}}',
+  'rates.pending': 'Esperando tipos de cambio…',
+  'rates.disclaimer':
+    'Tipos indicativos solo informativos; no constituyen asesoramiento financiero.',
+  'rates.offline': 'Sin conexión. Pueden mostrarse los últimos tipos guardados.',
   'rate.display': '1 {{from}} = {{value}} {{to}}',
   'theme.section': 'Tema',
   'theme.default': 'Oscuro estándar',
@@ -26,6 +30,7 @@ export default {
   'aria.close': 'Cerrar ajustes',
   'aria.amount': 'importe',
   'aria.removeCurrency': 'Quitar {{code}}',
+  'aria.copyValue': 'Copiar importe de {{code}}',
   'aria.dragReorder': 'Reordenar — arrastrar o Alt+flechas',
   'settings.langCount': '{{count}} idiomas',
   'settings.themeCount': '{{count}} temas',
@@ -36,6 +41,7 @@ export default {
   'update.reload': 'Recargar',
   'card.remove': 'Quitar',
   'card.removing': 'Quitando',
+  'card.copied': 'Copiado',
 
   'region.Popular': 'Populares',
   'region.North America': 'América del Norte',

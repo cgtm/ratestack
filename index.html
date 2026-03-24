@@ -40,6 +40,7 @@
           <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
         </svg>
       </button>
+      <span id="rate-offline" class="col-span-2 text-[11px] text-amber-400 hidden" role="status"></span>
       <span id="rate-stale" class="col-span-2 text-[11px] text-amber-500 hidden" role="status"></span>
       <span id="rate-error" class="col-span-2 text-[11px] text-red-400 hidden" role="alert"></span>
     </div>
@@ -47,8 +48,10 @@
     <main id="converter" class="flex flex-col gap-3">
     </main>
 
+    <p id="rate-disclaimer" class="text-[10px] text-dim/80 leading-snug pt-2 px-0.5 hidden"></p>
+
     <footer class="flex items-center justify-center gap-2 pt-8 pb-2 text-[11px] text-dim/70">
-      <span id="app-version">v0.7.0</span>
+      <span id="app-version">v0.8.0</span>
       <span>·</span>
       <a href="https://github.com/cgtm/ratestack/issues" target="_blank" rel="noopener" class="underline underline-offset-2 hover:text-dim transition-colors">Issues</a>
     </footer>

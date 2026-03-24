@@ -6,7 +6,7 @@
  * show correct copy (tagline, aria-labels) and theme colors before first paint as much as possible.
  */
 import { store, loadState } from './state.js';
-import { fetchRates, updateRateStatusUI } from './api.js';
+import { fetchRates, updateRateStatusUI, updateTimestamp } from './api.js';
 import { renderConverter, renderEmptyState, renderLoadingState } from './converter.js';
 import { openSettings, closeSettings, updateSettingsLabels } from './settings.js';
 import { applyTheme } from './theme.js';
@@ -39,7 +39,23 @@ document.getElementById('settings-close').addEventListener('click', closeSetting
 document.getElementById('settings-overlay').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) closeSettings();
 });
-document.getElementById('refresh-btn').addEventListener('click', fetchRates);
+function acknowledgeRefreshTap() {
+  const btn = document.getElementById('refresh-btn');
+  if (!btn) return;
+  btn.classList.remove('refresh-tap-anim');
+  void btn.offsetWidth;
+  btn.classList.add('refresh-tap-anim');
+  const done = () => {
+    btn.classList.remove('refresh-tap-anim');
+    btn.removeEventListener('animationend', done);
+  };
+  btn.addEventListener('animationend', done);
+}
+
+document.getElementById('refresh-btn').addEventListener('click', () => {
+  acknowledgeRefreshTap();
+  fetchRates();
+});
 
 /**
  * First `controllerchange` fires when this page first gets a controlling SW — skip banner.
@@ -61,15 +77,24 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+function refreshRateStatusAndTime() {
+  updateRateStatusUI();
+  updateTimestamp();
+}
+
 if (store.selected.length >= 2) {
   renderLoadingState();
+  refreshRateStatusAndTime();
   fetchRates().then(() => {
     renderConverter();
-    updateRateStatusUI();
+    refreshRateStatusAndTime();
   });
 } else {
   renderEmptyState();
 }
 
-/** Stale-line visibility tracks wall-clock age of the last successful fetch; refresh periodically. */
-setInterval(() => updateRateStatusUI(), 60 * 1000);
+window.addEventListener('online', refreshRateStatusAndTime);
+window.addEventListener('offline', refreshRateStatusAndTime);
+
+/** Stale line and relative “updated … ago” refresh on a steady cadence. */
+setInterval(() => refreshRateStatusAndTime(), 60 * 1000);
