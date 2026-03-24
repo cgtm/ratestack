@@ -1,3 +1,7 @@
+/**
+ * Theme palettes. Display names use keys `theme.<id>` in locale files; `label` here is unused in UI.
+ * `applyTheme` writes CSS variables consumed by Tailwind theme tokens and custom gradients.
+ */
 export const THEMES = {
   default: {
     label: 'Dark',
@@ -89,6 +93,7 @@ export function applyTheme(name) {
   const theme = THEMES[name] || THEMES.default;
   const root = document.documentElement;
 
+  // Maps JS keys like accent-secondary → --color-accent-secondary for CSS and Tailwind v4 @theme.
   Object.entries(theme.colors).forEach(([key, value]) => {
     root.style.setProperty(`--color-${key}`, value);
   });

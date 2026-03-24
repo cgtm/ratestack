@@ -1,3 +1,8 @@
+/**
+ * Settings sheet: currency toggles (grouped by region + selected strip), theme/language dropdowns,
+ * and accessibility (focus trap, Escape). Closing compares a snapshot to avoid refetching or
+ * clearing the typed amount when nothing material changed.
+ */
 import { CURRENCIES, CURRENCY_REGIONS } from './currencies.js';
 import { store, saveState } from './state.js';
 import { fetchRates } from './api.js';
@@ -12,6 +17,7 @@ let settingsOpenSnapshot = null;
 let settingsFocusTrapHandler = null;
 let settingsOpenPrevFocus = null;
 
+/** Single in-place confirmation; timer coalesces rapid toggles into one visible pulse. */
 function showSaveConfirmation() {
   const el = document.getElementById('settings-saved');
   if (!el) return;
@@ -32,6 +38,7 @@ function getFocusableInPanel(panel) {
   });
 }
 
+/** Cycle Tab within the panel instead of sending focus to the main view underneath. */
 function trapSettingsFocus(panel, e) {
   if (e.key !== 'Tab') return;
   const focusables = getFocusableInPanel(panel);
@@ -152,6 +159,7 @@ export function renderSettings() {
   });
 }
 
+/** Syncs all static chrome strings (header tagline, settings labels, main aria-labels) to `t()`. */
 export function updateSettingsLabels() {
   const tagline = document.getElementById('app-tagline');
   if (tagline) tagline.textContent = t('app.tagline');
@@ -239,6 +247,7 @@ function renderLanguagePicker() {
     dropdown.classList.remove('hidden');
     toggle.setAttribute('aria-expanded', 'true');
     toggle.querySelector('.lang-chevron').style.transform = 'rotate(180deg)';
+    // Next tick: attach outside-click close so the same user click that opened the menu does not close it.
     setTimeout(() => document.addEventListener('click', closeDropdown, { once: true }), 0);
   }
 
@@ -333,6 +342,7 @@ function renderThemePicker() {
     dropdown.classList.remove('hidden');
     toggle.setAttribute('aria-expanded', 'true');
     toggle.querySelector('.theme-chevron').style.transform = 'rotate(180deg)';
+    // See language picker: defer outside-click handler so open gesture does not close immediately.
     setTimeout(() => document.addEventListener('click', closeDropdown, { once: true }), 0);
   }
 
@@ -357,6 +367,7 @@ function renderThemePicker() {
 }
 
 export function openSettings() {
+  // Used on close to decide: refetch+clear amount only if selection changed; re-render cards if lang changed.
   settingsOpenSnapshot = JSON.stringify({
     selected: store.selected,
     lang: store.lang,
@@ -417,6 +428,7 @@ export function closeSettings() {
 
   if (store.selected.length >= 2) {
     store.baseCurrency = store.selected.includes(store.baseCurrency) ? store.baseCurrency : store.selected[0];
+    // Theme applies live via `applyTheme` in the picker; no extra pass needed here for theme-only edits.
     if (selectedChanged) {
       store.baseAmount = '';
       fetchRates().then(() => renderConverter());

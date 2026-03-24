@@ -1,3 +1,8 @@
+/**
+ * Drag reorder using a placeholder + fixed-position clone (works with touch and mouse).
+ * `container._dragInit` prevents duplicate listeners when `renderConverter` runs again.
+ * Alt+Arrow on a focused card duplicates reorder for keyboard users.
+ */
 import { store, saveState } from './state.js';
 import { updateRateLabels } from './api.js';
 
@@ -46,6 +51,7 @@ export function initDragAndDrop(container) {
     dragCard.style.transform = 'scale(1.03)';
     dragCard.style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)';
 
+    // Lift the card out of the flow so it can float above siblings while dragging.
     dragCard.parentNode.insertBefore(placeholder, dragCard);
     document.body.appendChild(dragCard);
     document.body.classList.add('dragging');

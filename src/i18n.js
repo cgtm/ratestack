@@ -1,3 +1,7 @@
+/**
+ * Translation lookup and locale metadata. Language state lives here (not in `state.js`) so
+ * `state.js` can import `numberLocale` / `t` without a circular import with the store.
+ */
 import en from './i18n/en.js';
 import zh from './i18n/zh.js';
 import hi from './i18n/hi.js';

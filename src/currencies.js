@@ -1,3 +1,7 @@
+/**
+ * Static catalog for the settings UI. Order: Popular first, then geography; codes may appear only once.
+ * Display names for the app come from i18n `currency.*` keys, not the `name` field below.
+ */
 export const CURRENCY_REGIONS = [
   { region: 'Popular', codes: ['USD', 'EUR', 'GBP', 'JPY', 'KRW', 'AUD', 'CAD', 'CHF', 'CNY'] },
   { region: 'Europe', codes: ['SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'ISK', 'RUB', 'UAH'] },
