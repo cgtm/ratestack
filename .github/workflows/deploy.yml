@@ -71,8 +71,9 @@ jobs:
         run: |
           VERSION="${{ steps.bump.outputs.version }}"
           MAJOR="${VERSION%%.*}"
+          REPO="${{ github.repository }}"
           if [[ "$MAJOR" == "v0" ]]; then
-            gh release create "$VERSION" --generate-notes --prerelease
+            gh release create "$VERSION" --generate-notes --prerelease --repo "$REPO"
           else
-            gh release create "$VERSION" --generate-notes
+            gh release create "$VERSION" --generate-notes --repo "$REPO"
           fi
