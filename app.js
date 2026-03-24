@@ -3,9 +3,12 @@ import { fetchRates } from './api.js';
 import { renderConverter } from './converter.js';
 import { openSettings, closeSettings } from './settings.js';
 import { applyTheme } from './theme.js';
+import { setLang } from './i18n.js';
 
 loadState();
 applyTheme(store.theme);
+setLang(store.lang);
+document.documentElement.lang = store.lang;
 
 document.getElementById('settings-btn').addEventListener('click', openSettings);
 document.getElementById('settings-close').addEventListener('click', closeSettings);

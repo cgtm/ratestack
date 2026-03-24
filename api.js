@@ -1,4 +1,5 @@
 import { store, formatNumber, getRateDisplay } from './state.js';
+import { t, numberLocale } from './i18n.js';
 
 const API_BASE = 'https://open.er-api.com/v6/latest';
 
@@ -31,7 +32,8 @@ export async function fetchRates() {
 export function updateTimestamp() {
   const el = document.getElementById('rate-timestamp');
   const now = new Date();
-  el.textContent = `Rates updated ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  const time = now.toLocaleTimeString(numberLocale(), { hour: '2-digit', minute: '2-digit' });
+  el.textContent = t('rates.updated', { time });
 }
 
 export function recalculate() {
