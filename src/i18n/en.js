@@ -1,4 +1,5 @@
 export default {
+  'app.tagline': 'Convert currencies, live rates.',
   'settings.title': 'Settings',
   'settings.hint': 'Select 2\u20135 currencies',
   'settings.saved': 'Settings saved!',

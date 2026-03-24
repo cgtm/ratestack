@@ -1,4 +1,5 @@
 export default {
+  'app.tagline': 'Convierte divisas, tipos al instante.',
   'settings.title': 'Ajustes',
   'settings.hint': 'Selecciona 2\u20135 monedas',
   'settings.saved': '¡Ajustes guardados!',

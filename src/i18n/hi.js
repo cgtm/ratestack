@@ -1,4 +1,5 @@
 export default {
+  'app.tagline': 'मुद्रा परिवर्तन, ताज़ा दरें।',
   'settings.title': 'सेटिंग्स',
   'settings.hint': '2\u20135 मुद्राएँ चुनें',
   'settings.saved': 'सेटिंग्स सहेजी गईं!',

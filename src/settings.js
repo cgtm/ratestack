@@ -152,7 +152,10 @@ export function renderSettings() {
   });
 }
 
-function updateSettingsLabels() {
+export function updateSettingsLabels() {
+  const tagline = document.getElementById('app-tagline');
+  if (tagline) tagline.textContent = t('app.tagline');
+
   const title = document.getElementById('settings-title');
   if (title) title.textContent = t('settings.title');
 

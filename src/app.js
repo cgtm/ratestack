@@ -1,7 +1,7 @@
 import { store, loadState } from './state.js';
 import { fetchRates, updateRateStatusUI } from './api.js';
 import { renderConverter, renderEmptyState, renderLoadingState } from './converter.js';
-import { openSettings, closeSettings } from './settings.js';
+import { openSettings, closeSettings, updateSettingsLabels } from './settings.js';
 import { applyTheme } from './theme.js';
 import { setLang, t } from './i18n.js';
 
@@ -9,6 +9,7 @@ loadState();
 applyTheme(store.theme);
 setLang(store.lang);
 document.documentElement.lang = store.lang;
+updateSettingsLabels();
 
 function showUpdateBanner() {
   let el = document.getElementById('update-banner');

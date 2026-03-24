@@ -1,4 +1,5 @@
 export default {
+  'app.tagline': '통화 환산, 실시간 환율.',
   'settings.title': '설정',
   'settings.hint': '통화 2~5개를 선택하세요',
   'settings.saved': '설정 저장됨!',
