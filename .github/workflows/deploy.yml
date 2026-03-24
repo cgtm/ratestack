@@ -33,6 +33,7 @@ jobs:
             PATCH=$((PATCH + 1))
           else
             echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -40,6 +41,7 @@ jobs:
           git tag "$NEW"
           git push origin "$NEW"
           echo "version=$NEW" >> "$GITHUB_OUTPUT"
+          echo "bumped=true" >> "$GITHUB_OUTPUT"
 
       - name: Install Tailwind CSS v4
         run: |
@@ -61,3 +63,16 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
+
+      - name: Create GitHub Release
+        if: steps.bump.outputs.bumped == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.bump.outputs.version }}"
+          MAJOR="${VERSION%%.*}"
+          if [[ "$MAJOR" == "v0" ]]; then
+            gh release create "$VERSION" --generate-notes --prerelease
+          else
+            gh release create "$VERSION" --generate-notes
+          fi
