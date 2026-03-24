@@ -1,8 +1,11 @@
-const CACHE_NAME = 'ratestack-93d6415';
+const CACHE_NAME = 'ratestack-309f7a2';
 const STATIC_ASSETS = [
   './', './index.html', './style.css', './manifest.json',
-  './app.js', './currencies.js', './state.js', './api.js',
-  './converter.js', './drag.js', './settings.js', './theme.js', './i18n.js',
+  './src/app.js', './src/api.js', './src/state.js', './src/currencies.js',
+  './src/converter.js', './src/drag.js', './src/swipe.js', './src/settings.js', './src/theme.js',
+  './src/i18n.js', './src/i18n/en.js', './src/i18n/ko.js',
+  './assets/favicon.ico', './assets/favicon-32.png', './assets/icon.svg',
+  './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (e) => {
