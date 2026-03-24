@@ -14,7 +14,7 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 - **Live exchange rates** — fetched from [Open Exchange Rates API](https://open.er-api.com), refreshable on demand
 - **Offline support** — service worker caches the app and last-fetched rates
 - **Homescreen install** — add via Safari (iOS) or Chrome (Android) for a standalone, full-screen app experience
-- **6 themes** — Default and Glowing in dark/light variants, plus Arctic dark/light
+- **10 themes** — five dark/light pairs: Default, Glowing, Arctic, Forest, and Ember
 - **5 languages** — English, Korean, Chinese, Hindi, and Spanish with locale-aware number formatting
 - **Settings saved** — inline confirmation whenever preferences change
 - **Version footer** — version number and GitHub Issues link in the main view
@@ -58,7 +58,7 @@ src/
   swipe.js                  Swipe-to-dismiss gesture handler
   settings.js               Settings panel UI, theme/language dropdowns, save confirmation
   currencies.js             Currency metadata and region groupings
-  theme.js                  Theme definitions (6 themes) and runtime application
+  theme.js                  Theme definitions (10 themes) and runtime application
   i18n.js                   i18n orchestrator — language state, translation lookup
   styles.css                Tailwind v4 source CSS (@theme, custom styles)
   i18n/
