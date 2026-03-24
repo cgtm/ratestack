@@ -1,4 +1,5 @@
 export default {
+  'app.tagline': '换算货币，实时汇率。',
   'settings.title': '设置',
   'settings.hint': '选择2\u20135种货币',
   'settings.saved': '设置已保存！',
