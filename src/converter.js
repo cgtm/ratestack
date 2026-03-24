@@ -1,3 +1,8 @@
+/**
+ * Main converter UI: builds currency cards, wires input (active = base currency), drag reorder,
+ * and swipe-to-remove. Full re-render on `renderConverter` keeps the implementation simple;
+ * `updateRateLabels` in api.js is used where we must avoid tearing down the DOM (focus).
+ */
 import { CURRENCIES } from './currencies.js';
 import { store, saveState, getRateDisplay, parseLocaleAmountString, normalizeTypingAmount } from './state.js';
 import { recalculate, updateRateLabels, fetchRatesIfNeeded } from './api.js';
@@ -14,6 +19,7 @@ const CARD_INACTIVE = 'border-brd';
 const ACTIVE_CLASSES = CARD_ACTIVE.split(' ');
 const INACTIVE_CLASSES = CARD_INACTIVE.split(' ');
 
+/** Persist order and base currency fallback when the active card is removed. */
 function removeCurrency(code) {
   store.selected = store.selected.filter((c) => c !== code);
   if (store.baseCurrency === code) {
@@ -38,7 +44,7 @@ export function renderConverter() {
     const card = document.createElement('div');
     card.className = `${CARD_BASE} ${isActive ? CARD_ACTIVE : CARD_INACTIVE}`;
     card.dataset.code = code;
-    card.tabIndex = 0;
+    card.tabIndex = 0; // keyboard reorder (Alt+arrows) when the card is focused
 
     const rateText = isActive ? '' : getRateDisplay(store.baseCurrency, code);
     const inputLabel = `${currencyName(code)} — ${t('aria.amount')}`;
@@ -80,6 +86,7 @@ export function renderConverter() {
     const input = card.querySelector('.currency-input');
 
     input.addEventListener('focus', () => {
+      // Visual active state + sync base; parse display text in case Intl formatted this field
       document.querySelectorAll('.currency-card').forEach((c) => {
         c.classList.remove(...ACTIVE_CLASSES);
         c.classList.add(...INACTIVE_CLASSES);
@@ -96,6 +103,7 @@ export function renderConverter() {
     });
 
     input.addEventListener('input', () => {
+      // Typing always updates the base amount; baseCurrency was set on focus
       const sanitized = normalizeTypingAmount(input.value);
       input.value = sanitized;
       store.baseAmount = sanitized;
@@ -108,6 +116,7 @@ export function renderConverter() {
   });
 
   recalculate();
+  // Guards inside these ensure listeners attach once per container despite re-renders.
   initDragAndDrop(container);
   initSwipeToDismiss(container, removeCurrency);
 }

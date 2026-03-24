@@ -1,3 +1,8 @@
+/**
+ * Horizontal swipe on the card body removes a currency; vertical intent is ignored so scrolling
+ * still works. Ignores starts on grip, input, and close to avoid fighting drag and typing.
+ * Threshold is 40% of card width; background interpolates toward red as the user approaches commit.
+ */
 export function initSwipeToDismiss(container, onRemove) {
   if (container._swipeInit) return;
   container._swipeInit = true;

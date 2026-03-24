@@ -1,14 +1,21 @@
+/**
+ * Exchange-rate fetching, conversion math, and rate-related UI (timestamp, per-card labels,
+ * error/stale hints). One HTTP request per refresh: open.er-api.com returns all cross-rates
+ * for a chosen base currency, so we only need the current `baseCurrency` as the API path segment.
+ */
 import { store, formatNumber, getRateDisplay } from './state.js';
 import { t, numberLocale } from './i18n.js';
 
 const API_BASE = 'https://open.er-api.com/v6/latest';
 const STALE_MS = 60 * 60 * 1000;
 
+/** True when `store.rates[base]` has an entry for every other selected code. */
 function hasCompleteRatesForBase(base) {
   if (!base || !store.rates[base]) return false;
   return store.selected.every((c) => c === base || store.rates[base][c] !== undefined);
 }
 
+/** Keep a single base key in `store.rates` so we never mix stale matrices from different fetches. */
 function pruneRatesExcept(base) {
   Object.keys(store.rates).forEach((k) => {
     if (k !== base) delete store.rates[k];
@@ -52,7 +59,8 @@ export function flashRefreshError() {
 }
 
 /**
- * Fetch rates for the current base if missing or incomplete. No-op if cache is complete.
+ * Called when switching the active card or after removing a currency: avoids redundant
+ * network calls if we already have a full rate matrix for the current base.
  */
 export async function fetchRatesIfNeeded() {
   const base = store.baseCurrency || store.selected[0];
@@ -113,6 +121,10 @@ export function updateTimestamp() {
   el.textContent = t('rates.updated', { time });
 }
 
+/**
+ * `store.baseAmount` is always a canonical string (digits + optional one `.`) for parsing;
+ * displayed values on non-base cards are formatted with `formatNumber` via Intl.
+ */
 export function recalculate() {
   if (!store.baseAmount || isNaN(parseFloat(store.baseAmount))) {
     store.selected.forEach((code) => {
@@ -136,6 +148,10 @@ export function recalculate() {
   });
 }
 
+/**
+ * Updates only the small "1 USD = …" lines when the base currency changes without rebuilding
+ * cards (avoids killing input focus — see converter focus handler).
+ */
 export function updateRateLabels() {
   store.selected.forEach((code) => {
     const card = document.querySelector(`.currency-card[data-code="${code}"]`);

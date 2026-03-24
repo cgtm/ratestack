@@ -1,3 +1,10 @@
+/**
+ * Central client state and amount parsing/formatting. `baseAmount` is stored as a plain string
+ * with `.` as decimal separator so `parseFloat` is reliable; display uses `Intl` per app language.
+ *
+ * i18n lives in `i18n.js` (not here) so this module can import `numberLocale` without creating
+ * a circular dependency with `state` ↔ `i18n`.
+ */
 import { numberLocale, t } from './i18n.js';
 import { CURRENCIES } from './currencies.js';
 
@@ -14,6 +21,7 @@ export const store = {
   ratesFetchError: false,
 };
 
+/** Regex-escape for building `RegExp` from locale separator strings (may be `.`). */
 function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -32,7 +40,8 @@ export function getLocaleSeparators() {
 }
 
 /**
- * Parse a display string (Intl-formatted or typed) into a canonical amount: digits with at most one '.'.
+ * Parse pasted or displayed values (e.g. `1.234,56` in es-ES) into canonical `1234.56`.
+ * Used on input focus so switching cards does not corrupt the numeric value.
  */
 export function parseLocaleAmountString(str) {
   if (str == null || str === '') return '';
@@ -67,7 +76,7 @@ export function parseLocaleAmountString(str) {
 }
 
 /**
- * Normalize raw typing/paste to canonical amount string (one optional dot).
+ * Live typing: allow `,` or `.` as decimal depending on context; collapse duplicate separators.
  */
 export function normalizeTypingAmount(raw) {
   let s = String(raw).replace(/[^\d.,]/g, '');
@@ -103,6 +112,7 @@ export function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (saved && Array.isArray(saved.selected)) {
+      // Drop unknown codes (e.g. removed currencies) so saved data stays valid.
       store.selected = saved.selected.filter((c) => CURRENCIES[c]);
     }
     if (saved && saved.theme) {
@@ -121,6 +131,7 @@ export function loadState() {
   store.baseCurrency = store.selected[0] || '';
 }
 
+/** Persist only durable preferences; `baseAmount` / `rates` are session-like. */
 export function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     selected: store.selected,
@@ -129,6 +140,7 @@ export function saveState() {
   }));
 }
 
+/** ISO codes that conventionally have no fractional units in UI. */
 const NO_DECIMALS = ['KRW', 'JPY', 'CLP', 'VND', 'IDR', 'UGX', 'TZS', 'HUF', 'ISK', 'COP'];
 
 export function formatNumber(value, code) {
