@@ -3,11 +3,14 @@ import { store, saveState } from './state.js';
 import { fetchRates } from './api.js';
 import { renderConverter } from './converter.js';
 import { THEMES, applyTheme } from './theme.js';
+import { t, currencyName, regionName, LANGUAGES, setLang } from './i18n.js';
 
 export function renderSettings() {
   const list = document.getElementById('currency-list');
   list.innerHTML = '';
 
+  updateSettingsLabels();
+  renderLanguagePicker();
   renderThemePicker();
 
   const closeBtn = document.getElementById('settings-close');
@@ -18,8 +21,8 @@ export function renderSettings() {
   const hint = document.querySelector('#settings-panel .settings-hint');
   if (hint) {
     hint.textContent = store.selected.length < 2
-      ? `Select at least ${2 - store.selected.length} more currency${store.selected.length === 1 ? '' : ' currencies'}`
-      : 'Select 2\u20135 currencies';
+      ? t('settings.hintMore', { count: 2 - store.selected.length })
+      : t('settings.hint');
   }
 
   const countEl = document.getElementById('settings-count');
@@ -44,7 +47,7 @@ export function renderSettings() {
       <span class="text-2xl">${info.flag}</span>
       <div class="flex-1">
         <div class="text-[15px] font-semibold">${code}</div>
-        <div class="text-xs text-dim">${info.name}</div>
+        <div class="text-xs text-dim">${currencyName(code)}</div>
       </div>
       <div class="w-[22px] h-[22px] rounded-md border-2 ${isSelected ? 'bg-accent border-accent' : 'border-brd'} flex items-center justify-center transition-[background,border-color] duration-200 shrink-0">
         <svg class="${isSelected ? 'opacity-100' : 'opacity-0'} transition-opacity duration-150" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -90,7 +93,7 @@ export function renderSettings() {
 
     const header = document.createElement('div');
     header.className = 'text-xs font-semibold text-dim uppercase tracking-widest pt-4 pb-1.5 first:pt-0';
-    header.textContent = region;
+    header.textContent = regionName(region);
     list.appendChild(header);
 
     unselected.forEach((code) => {
@@ -100,12 +103,48 @@ export function renderSettings() {
   });
 }
 
-export function openSettings() {
-  renderSettings();
-  const overlay = document.getElementById('settings-overlay');
-  const panel = document.getElementById('settings-panel');
-  overlay.classList.remove('opacity-0', 'invisible', 'pointer-events-none');
-  panel.classList.remove('translate-y-full');
+function updateSettingsLabels() {
+  const title = document.getElementById('settings-title');
+  if (title) title.textContent = t('settings.title');
+
+  const themeLabel = document.getElementById('theme-label');
+  if (themeLabel) themeLabel.textContent = t('theme.section');
+
+  const langLabel = document.getElementById('language-label');
+  if (langLabel) langLabel.textContent = t('language.section');
+
+  document.getElementById('settings-close')?.setAttribute('aria-label', t('aria.close'));
+  document.getElementById('settings-btn')?.setAttribute('aria-label', t('aria.settings'));
+  document.getElementById('refresh-btn')?.setAttribute('aria-label', t('aria.refresh'));
+}
+
+function renderLanguagePicker() {
+  const picker = document.getElementById('language-picker');
+  picker.innerHTML = '';
+
+  Object.entries(LANGUAGES).forEach(([key, lang]) => {
+    const isActive = store.lang === key;
+    const btn = document.createElement('button');
+    btn.className = [
+      'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 transition-[border-color] duration-200 cursor-pointer',
+      isActive ? 'border-accent' : 'border-transparent bg-bg',
+    ].join(' ');
+
+    btn.innerHTML = `
+      <span class="text-lg">${lang.flag}</span>
+      <span class="text-[13px] font-medium text-main">${lang.label}</span>
+    `;
+
+    btn.addEventListener('click', () => {
+      store.lang = key;
+      setLang(key);
+      document.documentElement.lang = key;
+      saveState();
+      renderSettings();
+    });
+
+    picker.appendChild(btn);
+  });
 }
 
 function renderThemePicker() {
@@ -128,7 +167,7 @@ function renderThemePicker() {
         <div class="w-5 h-5 rounded-full border-2 border-surface" style="background:${accent}"></div>
         <div class="w-5 h-5 rounded-full border-2 border-surface" style="background:${secondary}"></div>
       </div>
-      <span class="text-[13px] font-medium text-main">${theme.label}</span>
+      <span class="text-[13px] font-medium text-main">${t('theme.' + key)}</span>
     `;
 
     btn.addEventListener('click', () => {
@@ -140,6 +179,14 @@ function renderThemePicker() {
 
     picker.appendChild(btn);
   });
+}
+
+export function openSettings() {
+  renderSettings();
+  const overlay = document.getElementById('settings-overlay');
+  const panel = document.getElementById('settings-panel');
+  overlay.classList.remove('opacity-0', 'invisible', 'pointer-events-none');
+  panel.classList.remove('translate-y-full');
 }
 
 export function closeSettings() {

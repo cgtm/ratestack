@@ -2,6 +2,7 @@ import { CURRENCIES } from './currencies.js';
 import { store, getRateDisplay } from './state.js';
 import { recalculate, updateRateLabels } from './api.js';
 import { initDragAndDrop } from './drag.js';
+import { currencyName } from './i18n.js';
 
 const CARD_BASE = 'currency-card bg-surface border rounded-2xl px-[18px] py-4 transition-[border-color,box-shadow] duration-200 relative';
 const CARD_ACTIVE = 'border-accent shadow-accent-glow';
@@ -31,7 +32,7 @@ export function renderConverter() {
           <span class="text-[28px] leading-none">${info.flag}</span>
           <div>
             <span class="text-lg font-semibold tracking-[0.5px]">${code}</span>
-            <span class="text-xs text-dim font-normal ml-1">${info.name}</span>
+            <span class="text-xs text-dim font-normal ml-1">${currencyName(code)}</span>
           </div>
         </div>
         ${rateText ? `<span class="currency-rate text-[11px] text-dim bg-bg px-2 py-0.5 rounded-md whitespace-nowrap">${rateText}</span>` : ''}

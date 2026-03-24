@@ -1,3 +1,5 @@
+import { numberLocale, t } from './i18n.js';
+
 const STORAGE_KEY = 'ratestack';
 
 export const store = {
@@ -6,6 +8,7 @@ export const store = {
   baseCurrency: '',
   baseAmount: '',
   theme: 'default',
+  lang: 'en',
 };
 
 export function loadState() {
@@ -17,6 +20,9 @@ export function loadState() {
     if (saved && saved.theme) {
       store.theme = saved.theme;
     }
+    if (saved && saved.lang) {
+      store.lang = saved.lang;
+    }
   } catch {}
   store.baseCurrency = store.selected[0] || '';
 }
@@ -25,6 +31,7 @@ export function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     selected: store.selected,
     theme: store.theme,
+    lang: store.lang,
   }));
 }
 
@@ -33,7 +40,7 @@ const NO_DECIMALS = ['KRW', 'JPY', 'CLP', 'VND', 'IDR', 'UGX', 'TZS', 'HUF', 'IS
 export function formatNumber(value, code) {
   if (value === 0) return '';
   const decimals = NO_DECIMALS.includes(code) ? 0 : 2;
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat(numberLocale(), {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(value);
@@ -42,5 +49,5 @@ export function formatNumber(value, code) {
 export function getRateDisplay(fromCode, toCode) {
   if (!store.rates[fromCode] || !store.rates[fromCode][toCode]) return '';
   const rate = store.rates[fromCode][toCode];
-  return `1 ${fromCode} = ${formatNumber(rate, toCode)} ${toCode}`;
+  return t('rate.display', { from: fromCode, value: formatNumber(rate, toCode), to: toCode });
 }
