@@ -2,10 +2,13 @@ import { CURRENCIES, CURRENCY_REGIONS } from './currencies.js';
 import { store, saveState } from './state.js';
 import { fetchRates } from './api.js';
 import { renderConverter } from './converter.js';
+import { THEMES, applyTheme } from './theme.js';
 
 export function renderSettings() {
   const list = document.getElementById('currency-list');
   list.innerHTML = '';
+
+  renderThemePicker();
 
   const closeBtn = document.getElementById('settings-close');
   const canClose = store.selected.length >= 2;
@@ -33,7 +36,7 @@ export function renderSettings() {
     opt.className = [
       'flex items-center gap-3 px-3.5 py-3 border rounded-xl cursor-pointer',
       'transition-[border-color,opacity] duration-200 select-none',
-      isSelected ? 'border-accent bg-[rgba(108,99,255,0.08)]' : 'border-transparent bg-bg',
+      isSelected ? 'border-accent bg-[var(--color-accent-bg)]' : 'border-transparent bg-bg',
       atMax ? 'opacity-[0.35] !cursor-not-allowed' : '',
     ].join(' ');
 
@@ -103,6 +106,40 @@ export function openSettings() {
   const panel = document.getElementById('settings-panel');
   overlay.classList.remove('opacity-0', 'invisible', 'pointer-events-none');
   panel.classList.remove('translate-y-full');
+}
+
+function renderThemePicker() {
+  const picker = document.getElementById('theme-picker');
+  picker.innerHTML = '';
+
+  Object.entries(THEMES).forEach(([key, theme]) => {
+    const isActive = store.theme === key;
+    const btn = document.createElement('button');
+    btn.className = [
+      'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 transition-[border-color] duration-200 cursor-pointer',
+      isActive ? 'border-accent' : 'border-transparent bg-bg',
+    ].join(' ');
+
+    const accent = theme.colors.accent;
+    const secondary = theme.colors['accent-secondary'];
+
+    btn.innerHTML = `
+      <div class="flex -space-x-1.5">
+        <div class="w-5 h-5 rounded-full border-2 border-surface" style="background:${accent}"></div>
+        <div class="w-5 h-5 rounded-full border-2 border-surface" style="background:${secondary}"></div>
+      </div>
+      <span class="text-[13px] font-medium text-main">${theme.label}</span>
+    `;
+
+    btn.addEventListener('click', () => {
+      store.theme = key;
+      applyTheme(key);
+      saveState();
+      renderThemePicker();
+    });
+
+    picker.appendChild(btn);
+  });
 }
 
 export function closeSettings() {
