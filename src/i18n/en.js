@@ -1,5 +1,5 @@
 export default {
-  'settings.title': 'Currencies',
+  'settings.title': 'Settings',
   'settings.hint': 'Select 2\u20135 currencies',
   'settings.saved': 'Settings saved!',
   'settings.hintMore': 'Select at least {{count}} more',

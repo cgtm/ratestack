@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Tailwind CSS v4
         run: |
@@ -25,8 +27,11 @@ jobs:
           ./tailwindcss-linux-x64 -i src/styles.css -o style.css --minify
           rm tailwindcss-linux-x64
 
-      - name: Stamp service worker with commit hash
-        run: sed -i "s/ratestack-v[0-9]*/ratestack-${GITHUB_SHA::7}/" sw.js
+      - name: Stamp version and service worker
+        run: |
+          VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "${GITHUB_SHA::7}")
+          sed -i "s/>dev</>$VERSION</" index.html
+          sed -i "s/ratestack-v[0-9]*/ratestack-${GITHUB_SHA::7}/" sw.js
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

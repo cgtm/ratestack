@@ -1,5 +1,5 @@
 export default {
-  'settings.title': '통화',
+  'settings.title': '설정',
   'settings.hint': '통화 2~5개를 선택하세요',
   'settings.saved': '설정 저장됨!',
   'settings.hintMore': '{{count}}개 더 선택하세요',
