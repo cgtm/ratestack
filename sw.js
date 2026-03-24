@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ratestack-feb5ca9';
+const CACHE_NAME = 'ratestack-48803b9';
 const STATIC_ASSETS = [
   './', './index.html', './style.css', './manifest.json',
   './src/app.js', './src/api.js', './src/state.js', './src/currencies.js',
