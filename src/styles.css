@@ -2,7 +2,7 @@
 
 @source "../index.html";
 
-@theme inline {
+@theme {
   --color-bg: #0f0f1a;
   --color-surface: #1a1a2e;
   --color-brd: #2a2a4a;
