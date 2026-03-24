@@ -5,6 +5,16 @@ import { renderConverter, renderEmptyState } from './converter.js';
 import { THEMES, applyTheme } from './theme.js';
 import { t, currencyName, regionName, LANGUAGES, setLang } from './i18n.js';
 
+let saveTimer = null;
+function showSaveConfirmation() {
+  const el = document.getElementById('settings-saved');
+  if (!el) return;
+  el.textContent = t('settings.saved');
+  el.style.opacity = '1';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { el.style.opacity = '0'; }, 1500);
+}
+
 export function renderSettings() {
   const list = document.getElementById('currency-list');
   list.innerHTML = '';
@@ -61,6 +71,7 @@ export function renderSettings() {
 
       saveState();
       renderSettings();
+      showSaveConfirmation();
     });
 
     return opt;
@@ -134,6 +145,7 @@ function renderLanguagePicker() {
       document.documentElement.lang = key;
       saveState();
       renderSettings();
+      showSaveConfirmation();
     });
 
     picker.appendChild(btn);
@@ -168,6 +180,7 @@ function renderThemePicker() {
       applyTheme(key);
       saveState();
       renderThemePicker();
+      showSaveConfirmation();
     });
 
     picker.appendChild(btn);

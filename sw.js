@@ -1,8 +1,8 @@
-const CACHE_NAME = 'ratestack-v14';
+const CACHE_NAME = 'ratestack-v15';
 const STATIC_ASSETS = [
   './', './index.html', './style.css', './manifest.json',
   './src/app.js', './src/api.js', './src/state.js', './src/currencies.js',
-  './src/converter.js', './src/drag.js', './src/settings.js', './src/theme.js',
+  './src/converter.js', './src/drag.js', './src/swipe.js', './src/settings.js', './src/theme.js',
   './src/i18n.js', './src/i18n/en.js', './src/i18n/ko.js',
   './assets/favicon.ico', './assets/favicon-32.png', './assets/icon.svg',
   './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png',

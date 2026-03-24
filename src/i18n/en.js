@@ -1,6 +1,7 @@
 export default {
   'settings.title': 'Currencies',
   'settings.hint': 'Select 2\u20135 currencies',
+  'settings.saved': 'Settings saved!',
   'settings.hintMore': 'Select at least {{count}} more',
   'empty.message': 'Select between 2 and 5 currencies to get started.',
   'empty.link': 'Open settings',
@@ -13,6 +14,8 @@ export default {
   'aria.settings': 'Settings',
   'aria.refresh': 'Refresh rates',
   'aria.close': 'Close settings',
+  'card.remove': 'Remove',
+  'card.removing': 'Removing',
 
   'region.Popular': 'Popular',
   'region.North America': 'North America',

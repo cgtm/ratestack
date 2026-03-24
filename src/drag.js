@@ -2,6 +2,9 @@ import { store, saveState } from './state.js';
 import { updateRateLabels } from './api.js';
 
 export function initDragAndDrop(container) {
+  if (container._dragInit) return;
+  container._dragInit = true;
+
   let dragCard = null;
   let placeholder = null;
   let startY = 0;

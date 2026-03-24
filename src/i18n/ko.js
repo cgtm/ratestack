@@ -1,6 +1,7 @@
 export default {
   'settings.title': '통화',
   'settings.hint': '통화 2~5개를 선택하세요',
+  'settings.saved': '설정 저장됨!',
   'settings.hintMore': '{{count}}개 더 선택하세요',
   'empty.message': '통화 2~5개를 선택하여 시작하세요.',
   'empty.link': '설정 열기',
@@ -13,6 +14,8 @@ export default {
   'aria.settings': '설정',
   'aria.refresh': '환율 새로고침',
   'aria.close': '설정 닫기',
+  'card.remove': '제거',
+  'card.removing': '제거 중',
 
   'region.Popular': '인기',
   'region.North America': '북미',
