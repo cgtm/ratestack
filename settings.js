@@ -1,7 +1,7 @@
 import { CURRENCIES, CURRENCY_REGIONS } from './currencies.js';
 import { store, saveState } from './state.js';
 import { fetchRates } from './api.js';
-import { renderConverter } from './converter.js';
+import { renderConverter, renderEmptyState } from './converter.js';
 import { THEMES, applyTheme } from './theme.js';
 import { t, currencyName, regionName, LANGUAGES, setLang } from './i18n.js';
 
@@ -12,11 +12,6 @@ export function renderSettings() {
   updateSettingsLabels();
   renderLanguagePicker();
   renderThemePicker();
-
-  const closeBtn = document.getElementById('settings-close');
-  const canClose = store.selected.length >= 2;
-  closeBtn.classList.toggle('opacity-30', !canClose);
-  closeBtn.classList.toggle('pointer-events-none', !canClose);
 
   const hint = document.querySelector('#settings-panel .settings-hint');
   if (hint) {
@@ -33,7 +28,6 @@ export function renderSettings() {
     if (!info) return null;
     const isSelected = store.selected.includes(code);
     const atMax = store.selected.length >= 5 && !isSelected;
-    const atMin = store.selected.length <= 2 && isSelected;
 
     const opt = document.createElement('div');
     opt.className = [
@@ -57,7 +51,6 @@ export function renderSettings() {
     `;
 
     opt.addEventListener('click', () => {
-      if (isSelected && atMin) return;
       if (!isSelected && atMax) return;
 
       if (isSelected) {
@@ -190,12 +183,16 @@ export function openSettings() {
 }
 
 export function closeSettings() {
-  if (store.selected.length < 2) return;
   const overlay = document.getElementById('settings-overlay');
   const panel = document.getElementById('settings-panel');
   overlay.classList.add('opacity-0', 'invisible', 'pointer-events-none');
   panel.classList.add('translate-y-full');
-  store.baseCurrency = store.selected.includes(store.baseCurrency) ? store.baseCurrency : store.selected[0];
-  store.baseAmount = '';
-  fetchRates().then(() => renderConverter());
+
+  if (store.selected.length >= 2) {
+    store.baseCurrency = store.selected.includes(store.baseCurrency) ? store.baseCurrency : store.selected[0];
+    store.baseAmount = '';
+    fetchRates().then(() => renderConverter());
+  } else {
+    renderEmptyState();
+  }
 }

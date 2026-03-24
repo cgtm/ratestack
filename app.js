@@ -1,6 +1,6 @@
 import { store, loadState } from './state.js';
 import { fetchRates } from './api.js';
-import { renderConverter } from './converter.js';
+import { renderConverter, renderEmptyState } from './converter.js';
 import { openSettings, closeSettings } from './settings.js';
 import { applyTheme } from './theme.js';
 import { setLang } from './i18n.js';
@@ -33,8 +33,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-if (store.selected.length < 2) {
-  openSettings();
-} else {
+if (store.selected.length >= 2) {
   fetchRates().then(() => renderConverter());
+} else {
+  renderEmptyState();
 }
