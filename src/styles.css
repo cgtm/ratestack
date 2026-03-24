@@ -9,13 +9,10 @@
   --color-main: #e8e8f0;
   --color-dim: #8888aa;
   --color-accent: #6c63ff;
-  --shadow-accent-glow: 0 0 0 3px var(--color-accent-glow);
-}
-
-:root {
   --color-accent-secondary: #a78bfa;
   --color-accent-glow: rgba(108, 99, 255, 0.25);
   --color-accent-bg: rgba(108, 99, 255, 0.08);
+  --shadow-accent-glow: 0 0 0 3px var(--color-accent-glow);
 }
 
 body {

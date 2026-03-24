@@ -5,7 +5,13 @@ import { renderConverter, renderEmptyState } from './converter.js';
 import { THEMES, applyTheme } from './theme.js';
 import { t, currencyName, regionName, LANGUAGES, setLang } from './i18n.js';
 
+const CHEVRON_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+
 let saveTimer = null;
+let settingsOpenSnapshot = null;
+let settingsFocusTrapHandler = null;
+let settingsOpenPrevFocus = null;
+
 function showSaveConfirmation() {
   const el = document.getElementById('settings-saved');
   if (!el) return;
@@ -13,6 +19,34 @@ function showSaveConfirmation() {
   el.style.opacity = '1';
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => { el.style.opacity = '0'; }, 1500);
+}
+
+function getFocusableInPanel(panel) {
+  const nodes = panel.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  );
+  return [...nodes].filter((el) => {
+    if (el.getAttribute('aria-hidden') === 'true') return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  });
+}
+
+function trapSettingsFocus(panel, e) {
+  if (e.key !== 'Tab') return;
+  const focusables = getFocusableInPanel(panel);
+  if (focusables.length === 0) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (e.shiftKey) {
+    if (document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    }
+  } else if (document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
 }
 
 export function renderSettings() {
@@ -40,10 +74,13 @@ export function renderSettings() {
     const atMax = store.selected.length >= 5 && !isSelected;
 
     const opt = document.createElement('div');
+    opt.setAttribute('role', 'checkbox');
+    opt.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+    opt.tabIndex = 0;
     opt.className = [
       'flex items-center gap-3 px-3.5 py-3 border rounded-xl cursor-pointer',
       'transition-[border-color,opacity] duration-200 select-none',
-      isSelected ? 'border-accent bg-[var(--color-accent-bg)]' : 'border-transparent bg-bg',
+      isSelected ? 'border-accent bg-[var(--color-accent-bg)]' : 'border-brd bg-bg',
       atMax ? 'opacity-[0.35] !cursor-not-allowed' : '',
     ].join(' ');
 
@@ -60,7 +97,7 @@ export function renderSettings() {
       </div>
     `;
 
-    opt.addEventListener('click', () => {
+    function toggle() {
       if (!isSelected && atMax) return;
 
       if (isSelected) {
@@ -72,6 +109,14 @@ export function renderSettings() {
       saveState();
       renderSettings();
       showSaveConfirmation();
+    }
+
+    opt.addEventListener('click', toggle);
+    opt.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        toggle();
+      }
     });
 
     return opt;
@@ -117,29 +162,65 @@ function updateSettingsLabels() {
   const langLabel = document.getElementById('language-label');
   if (langLabel) langLabel.textContent = t('language.section');
 
+  const currLabel = document.getElementById('currencies-label');
+  if (currLabel) currLabel.textContent = t('settings.currencies');
+
   document.getElementById('settings-close')?.setAttribute('aria-label', t('aria.close'));
   document.getElementById('settings-btn')?.setAttribute('aria-label', t('aria.settings'));
   document.getElementById('refresh-btn')?.setAttribute('aria-label', t('aria.refresh'));
+}
+
+function langOptionHTML(lang) {
+  return `
+    <span class="text-lg shrink-0">${lang.flag}</span>
+    <span class="text-[13px] font-medium text-main">${lang.label}</span>
+  `;
 }
 
 function renderLanguagePicker() {
   const picker = document.getElementById('language-picker');
   picker.innerHTML = '';
 
+  const wrapper = document.createElement('div');
+  wrapper.className = 'relative';
+
+  const current = LANGUAGES[store.lang] || LANGUAGES.en;
+  const langCount = Object.keys(LANGUAGES).length;
+
+  const listId = 'lang-dropdown-list';
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 border-brd bg-bg cursor-pointer transition-[border-color] duration-200 hover:border-accent';
+  toggle.setAttribute('aria-haspopup', 'listbox');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-controls', listId);
+  toggle.innerHTML = `
+    ${langOptionHTML(current)}
+    <div class="ml-auto flex items-center gap-1.5 shrink-0">
+      <span class="text-[11px] text-dim">${t('settings.langCount', { count: langCount })}</span>
+      <span class="text-dim transition-transform duration-200 lang-chevron">${CHEVRON_SVG}</span>
+    </div>
+  `;
+
+  const dropdown = document.createElement('div');
+  dropdown.id = listId;
+  dropdown.setAttribute('role', 'listbox');
+  dropdown.className = 'absolute left-0 right-0 top-full mt-1 bg-surface border border-brd rounded-xl overflow-hidden z-10 hidden';
+
   Object.entries(LANGUAGES).forEach(([key, lang]) => {
-    const isActive = store.lang === key;
-    const btn = document.createElement('button');
-    btn.className = [
-      'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 transition-[border-color] duration-200 cursor-pointer',
-      isActive ? 'border-accent' : 'border-transparent bg-bg',
+    const isActive = key === store.lang;
+    const opt = document.createElement('button');
+    opt.type = 'button';
+    opt.setAttribute('role', 'option');
+    opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    opt.className = [
+      'w-full flex items-center gap-2 px-3 py-2.5 cursor-pointer transition-colors duration-150',
+      isActive ? 'bg-[var(--color-accent-bg)]' : 'hover:bg-bg',
     ].join(' ');
+    opt.innerHTML = langOptionHTML(lang);
 
-    btn.innerHTML = `
-      <span class="text-lg">${lang.flag}</span>
-      <span class="text-[13px] font-medium text-main">${lang.label}</span>
-    `;
-
-    btn.addEventListener('click', () => {
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation();
       store.lang = key;
       setLang(key);
       document.documentElement.lang = key;
@@ -148,34 +229,93 @@ function renderLanguagePicker() {
       showSaveConfirmation();
     });
 
-    picker.appendChild(btn);
+    dropdown.appendChild(opt);
   });
+
+  function openDropdown() {
+    dropdown.classList.remove('hidden');
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.querySelector('.lang-chevron').style.transform = 'rotate(180deg)';
+    setTimeout(() => document.addEventListener('click', closeDropdown, { once: true }), 0);
+  }
+
+  function closeDropdown() {
+    dropdown.classList.add('hidden');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.querySelector('.lang-chevron').style.transform = '';
+  }
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (dropdown.classList.contains('hidden')) {
+      openDropdown();
+    } else {
+      closeDropdown();
+    }
+  });
+
+  wrapper.appendChild(toggle);
+  wrapper.appendChild(dropdown);
+  picker.appendChild(wrapper);
+}
+
+function themeOptionHTML(key, theme) {
+  const bg = theme.colors.bg;
+  const accent = theme.colors.accent;
+  const secondary = theme.colors['accent-secondary'];
+  return `
+    <div class="flex -space-x-1.5 shrink-0">
+      <div class="w-5 h-5 rounded-full border-2" style="background:${accent}; border-color:${bg}"></div>
+      <div class="w-5 h-5 rounded-full border-2" style="background:${secondary}; border-color:${bg}"></div>
+    </div>
+    <span class="text-[13px] font-medium text-main">${t('theme.' + key)}</span>
+  `;
 }
 
 function renderThemePicker() {
   const picker = document.getElementById('theme-picker');
   picker.innerHTML = '';
 
+  const wrapper = document.createElement('div');
+  wrapper.className = 'relative';
+
+  const current = THEMES[store.theme] || THEMES.default;
+  const themeCount = Object.keys(THEMES).length;
+
+  const listId = 'theme-dropdown-list';
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 border-brd bg-bg cursor-pointer transition-[border-color] duration-200 hover:border-accent';
+  toggle.setAttribute('aria-haspopup', 'listbox');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-controls', listId);
+  toggle.innerHTML = `
+    ${themeOptionHTML(store.theme, current)}
+    <div class="ml-auto flex items-center gap-1.5 shrink-0">
+      <span class="text-[11px] text-dim">${t('settings.themeCount', { count: themeCount })}</span>
+      <span class="text-dim transition-transform duration-200 theme-chevron">${CHEVRON_SVG}</span>
+    </div>
+  `;
+
+  const dropdown = document.createElement('div');
+  dropdown.id = listId;
+  dropdown.setAttribute('role', 'listbox');
+  dropdown.className = 'absolute left-0 right-0 top-full mt-1 bg-surface border border-brd rounded-xl overflow-hidden z-10 hidden';
+
   Object.entries(THEMES).forEach(([key, theme]) => {
-    const isActive = store.theme === key;
-    const btn = document.createElement('button');
-    btn.className = [
-      'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 transition-[border-color] duration-200 cursor-pointer',
-      isActive ? 'border-accent' : 'border-transparent bg-bg',
+    const isActive = key === store.theme;
+    const opt = document.createElement('button');
+    opt.type = 'button';
+    opt.setAttribute('role', 'option');
+    opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    opt.className = [
+      'w-full flex items-center gap-2 px-3 py-2.5 cursor-pointer transition-colors duration-150',
+      isActive ? 'bg-[var(--color-accent-bg)]' : 'hover:bg-bg',
     ].join(' ');
+    opt.innerHTML = themeOptionHTML(key, theme);
 
-    const accent = theme.colors.accent;
-    const secondary = theme.colors['accent-secondary'];
-
-    btn.innerHTML = `
-      <div class="flex -space-x-1.5">
-        <div class="w-5 h-5 rounded-full border-2 border-surface" style="background:${accent}"></div>
-        <div class="w-5 h-5 rounded-full border-2 border-surface" style="background:${secondary}"></div>
-      </div>
-      <span class="text-[13px] font-medium text-main">${t('theme.' + key)}</span>
-    `;
-
-    btn.addEventListener('click', () => {
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation();
       store.theme = key;
       applyTheme(key);
       saveState();
@@ -183,16 +323,66 @@ function renderThemePicker() {
       showSaveConfirmation();
     });
 
-    picker.appendChild(btn);
+    dropdown.appendChild(opt);
   });
+
+  function openDropdown() {
+    dropdown.classList.remove('hidden');
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.querySelector('.theme-chevron').style.transform = 'rotate(180deg)';
+    setTimeout(() => document.addEventListener('click', closeDropdown, { once: true }), 0);
+  }
+
+  function closeDropdown() {
+    dropdown.classList.add('hidden');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.querySelector('.theme-chevron').style.transform = '';
+  }
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (dropdown.classList.contains('hidden')) {
+      openDropdown();
+    } else {
+      closeDropdown();
+    }
+  });
+
+  wrapper.appendChild(toggle);
+  wrapper.appendChild(dropdown);
+  picker.appendChild(wrapper);
 }
 
 export function openSettings() {
+  settingsOpenSnapshot = JSON.stringify({
+    selected: store.selected,
+    lang: store.lang,
+    theme: store.theme,
+  });
   renderSettings();
   const overlay = document.getElementById('settings-overlay');
   const panel = document.getElementById('settings-panel');
+  settingsOpenPrevFocus = document.activeElement;
   overlay.classList.remove('opacity-0', 'invisible', 'pointer-events-none');
   panel.classList.remove('translate-y-full');
+
+  if (settingsFocusTrapHandler) {
+    document.removeEventListener('keydown', settingsFocusTrapHandler);
+  }
+  settingsFocusTrapHandler = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSettings();
+      return;
+    }
+    trapSettingsFocus(panel, e);
+  };
+  document.addEventListener('keydown', settingsFocusTrapHandler);
+
+  requestAnimationFrame(() => {
+    const focusables = getFocusableInPanel(panel);
+    (focusables[0] || document.getElementById('settings-close'))?.focus();
+  });
 }
 
 export function closeSettings() {
@@ -201,10 +391,35 @@ export function closeSettings() {
   overlay.classList.add('opacity-0', 'invisible', 'pointer-events-none');
   panel.classList.add('translate-y-full');
 
+  if (settingsFocusTrapHandler) {
+    document.removeEventListener('keydown', settingsFocusTrapHandler);
+    settingsFocusTrapHandler = null;
+  }
+
+  if (settingsOpenPrevFocus && typeof settingsOpenPrevFocus.focus === 'function') {
+    settingsOpenPrevFocus.focus();
+  }
+  settingsOpenPrevFocus = null;
+
+  let snap = null;
+  try {
+    snap = settingsOpenSnapshot ? JSON.parse(settingsOpenSnapshot) : null;
+  } catch {
+    snap = null;
+  }
+  settingsOpenSnapshot = null;
+
+  const selectedChanged = snap && JSON.stringify(snap.selected) !== JSON.stringify(store.selected);
+  const langChanged = snap && snap.lang !== store.lang;
+
   if (store.selected.length >= 2) {
     store.baseCurrency = store.selected.includes(store.baseCurrency) ? store.baseCurrency : store.selected[0];
-    store.baseAmount = '';
-    fetchRates().then(() => renderConverter());
+    if (selectedChanged) {
+      store.baseAmount = '';
+      fetchRates().then(() => renderConverter());
+    } else if (langChanged) {
+      renderConverter();
+    }
   } else {
     renderEmptyState();
   }

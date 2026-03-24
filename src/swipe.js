@@ -100,7 +100,6 @@ export function initSwipeToDismiss(container, onRemove) {
       deleteZone.style.opacity = '0';
       deleteZone.textContent = deleteZone.dataset.remove;
     }
-    detach();
   }
 
   function detach() {

@@ -2,35 +2,112 @@ import { store, formatNumber, getRateDisplay } from './state.js';
 import { t, numberLocale } from './i18n.js';
 
 const API_BASE = 'https://open.er-api.com/v6/latest';
+const STALE_MS = 60 * 60 * 1000;
+
+function hasCompleteRatesForBase(base) {
+  if (!base || !store.rates[base]) return false;
+  return store.selected.every((c) => c === base || store.rates[base][c] !== undefined);
+}
+
+function pruneRatesExcept(base) {
+  Object.keys(store.rates).forEach((k) => {
+    if (k !== base) delete store.rates[k];
+  });
+}
+
+export function updateRateStatusUI() {
+  const staleEl = document.getElementById('rate-stale');
+  const errEl = document.getElementById('rate-error');
+  const refreshBtn = document.getElementById('refresh-btn');
+  if (!staleEl || !errEl) return;
+
+  if (store.ratesFetchError) {
+    errEl.textContent = t('rates.error');
+    errEl.classList.remove('hidden');
+  } else {
+    errEl.classList.add('hidden');
+  }
+
+  const last = store.ratesLastSuccessAt;
+  const old = last != null && Date.now() - last > STALE_MS;
+  if (old && store.selected.length >= 2) {
+    staleEl.textContent = t('rates.stale');
+    staleEl.classList.remove('hidden');
+  } else {
+    staleEl.classList.add('hidden');
+  }
+
+  if (refreshBtn) {
+    refreshBtn.classList.remove('text-red-400', 'ring-2', 'ring-red-400/50');
+  }
+}
+
+export function flashRefreshError() {
+  const refreshBtn = document.getElementById('refresh-btn');
+  if (!refreshBtn) return;
+  refreshBtn.classList.add('text-red-400', 'ring-2', 'ring-red-400/50');
+  setTimeout(() => {
+    refreshBtn.classList.remove('text-red-400', 'ring-2', 'ring-red-400/50');
+  }, 1200);
+}
+
+/**
+ * Fetch rates for the current base if missing or incomplete. No-op if cache is complete.
+ */
+export async function fetchRatesIfNeeded() {
+  const base = store.baseCurrency || store.selected[0];
+  if (!base || store.selected.length < 2) return;
+  if (hasCompleteRatesForBase(base)) {
+    recalculate();
+    updateRateLabels();
+    updateRateStatusUI();
+    return;
+  }
+  return fetchRates();
+}
 
 export async function fetchRates() {
   const svg = document.querySelector('#refresh-btn svg');
-  svg.classList.add('animate-spin');
+  svg?.classList.add('animate-spin');
+
+  const base = store.baseCurrency || store.selected[0];
+  if (!base || store.selected.length < 2) {
+    svg?.classList.remove('animate-spin');
+    return;
+  }
 
   try {
-    const promises = store.selected.map(async (code) => {
-      const res = await fetch(`${API_BASE}/${code}`);
-      const data = await res.json();
-      if (data.result === 'success') {
-        const relevant = {};
-        store.selected.forEach((c) => {
-          if (c !== code && data.rates[c] !== undefined) relevant[c] = data.rates[c];
-        });
-        store.rates[code] = relevant;
-      }
+    const res = await fetch(`${API_BASE}/${base}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.result !== 'success') {
+      throw new Error(data['error-type'] || 'API error');
+    }
+    const relevant = {};
+    store.selected.forEach((c) => {
+      if (c !== base && data.rates[c] !== undefined) relevant[c] = data.rates[c];
     });
-    await Promise.all(promises);
+    store.rates[base] = relevant;
+    pruneRatesExcept(base);
+    store.ratesLastSuccessAt = Date.now();
+    store.ratesFetchError = false;
     updateTimestamp();
     recalculate();
+    updateRateLabels();
+    updateRateStatusUI();
   } catch (err) {
     console.error('Failed to fetch rates:', err);
+    store.ratesFetchError = true;
+    updateRateStatusUI();
+    flashRefreshError();
   } finally {
-    svg.classList.remove('animate-spin');
+    svg?.classList.remove('animate-spin');
   }
 }
 
 export function updateTimestamp() {
   const el = document.getElementById('rate-timestamp');
+  if (!el) return;
   const now = new Date();
   const time = now.toLocaleTimeString(numberLocale(), { hour: '2-digit', minute: '2-digit' });
   el.textContent = t('rates.updated', { time });
@@ -64,15 +141,9 @@ export function updateRateLabels() {
     const card = document.querySelector(`.currency-card[data-code="${code}"]`);
     if (!card) return;
     const rateEl = card.querySelector('.currency-rate');
+    if (!rateEl) return;
     const rateText = code === store.baseCurrency ? '' : getRateDisplay(store.baseCurrency, code);
-    if (rateEl) {
-      rateEl.textContent = rateText || '';
-      rateEl.style.display = rateText ? '' : 'none';
-    } else if (rateText) {
-      const span = document.createElement('span');
-      span.className = 'currency-rate text-[11px] text-dim bg-bg px-2 py-0.5 rounded-md whitespace-nowrap';
-      span.textContent = rateText;
-      card.querySelector('.card-top').appendChild(span);
-    }
+    rateEl.textContent = rateText || '';
+    rateEl.classList.toggle('hidden', !rateText);
   });
 }
