@@ -23,7 +23,7 @@ function pruneRatesExcept(base) {
   });
 }
 
-/** Human-readable “2 min ago” using Intl (locale matches app language). */
+/** Human-readable “2 min ago” using Intl (`numberLocale()` — typically system locale). */
 function formatRelativeSince(ms) {
   const rtf = new Intl.RelativeTimeFormat(numberLocale(), { numeric: 'auto' });
   const diffSec = Math.max(0, Math.floor((Date.now() - ms) / 1000));

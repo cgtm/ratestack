@@ -6,7 +6,7 @@
  * show correct copy (tagline, aria-labels) and theme colors before first paint as much as possible.
  */
 import { store, loadState } from './state.js';
-import { fetchRates, updateRateStatusUI, updateTimestamp } from './api.js';
+import { fetchRates, updateRateStatusUI, updateTimestamp, recalculate, updateRateLabels } from './api.js';
 import { renderConverter, renderEmptyState, renderLoadingState } from './converter.js';
 import { openSettings, closeSettings, updateSettingsLabels } from './settings.js';
 import { applyTheme } from './theme.js';
@@ -95,6 +95,15 @@ if (store.selected.length >= 2) {
 
 window.addEventListener('online', refreshRateStatusAndTime);
 window.addEventListener('offline', refreshRateStatusAndTime);
+
+/** OS / browser locale changed — refresh Intl-based numbers and “updated … ago” without reload. */
+window.addEventListener('languagechange', () => {
+  refreshRateStatusAndTime();
+  if (store.selected.length >= 2) {
+    recalculate();
+    updateRateLabels();
+  }
+});
 
 /** Stale line and relative “updated … ago” refresh on a steady cadence. */
 setInterval(() => refreshRateStatusAndTime(), 60 * 1000);

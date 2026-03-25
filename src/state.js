@@ -1,6 +1,7 @@
 /**
  * Central client state and amount parsing/formatting. `baseAmount` is stored as a plain string
- * with `.` as decimal separator so `parseFloat` is reliable; display uses `Intl` per app language.
+ * with `.` as decimal separator so `parseFloat` is reliable; display uses `Intl` with the
+ * system-aware locale from `numberLocale()` (see i18n.js).
  *
  * i18n lives in `i18n.js` (not here) so this module can import `numberLocale` without creating
  * a circular dependency with `state` ↔ `i18n`.
