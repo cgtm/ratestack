@@ -69,12 +69,13 @@ src/
     es.js                   Spanish translations
 
 assets/
-  favicon.ico               Favicon (48×48)
-  favicon-32.png            Favicon (32×32)
-  icon.svg                  SVG icon
-  icon-192.png              PWA icon (192×192)
-  icon-512.png              PWA icon (512×512)
-  apple-touch-icon.png      iOS homescreen icon (180×180)
+  logo-alt-icon.svg             SVG icon (referenced by index.html)
+  logo-alt-icon-favicon.ico     Favicon
+  logo-alt-icon-favicon-32.png  32×32 favicon
+  logo-alt-icon-192.png         PWA 192×192
+  logo-alt-icon-512.png         PWA 512×512
+  logo-alt-icon-apple-touch.png iOS 180×180
+  icon.svg, icon-*.png, favicon*, apple-touch-icon.png  older assets (still in repo)
 
 .github/workflows/
   deploy.yml                CI/CD — build, version bump, deploy, release
