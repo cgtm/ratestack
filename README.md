@@ -47,19 +47,33 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 ```
 index.html                  App shell and layout
 style.css                   Built CSS output (generated, do not edit)
-sw.js                       Service worker — caches static assets and API responses
+sw.template.js              Service worker source (STATIC_ASSETS filled by script)
+sw.js                       Generated service worker — do not edit by hand
 manifest.json               PWA manifest for homescreen install
-.prettierignore             Excludes generated CSS and build output from Prettier
+.prettierignore             Excludes generated CSS, sw.js, and build output from Prettier
+
+scripts/
+  generate-sw.mjs           Builds sw.js precache list from src/app.js imports + assets/
 
 src/
   app.js                    Entry — bootstrap, wiring, service worker registration
   state.js                  Shared store, localStorage persistence, number formatting
   api.js                    Rate fetching, conversion math, timestamp / status UI
-  converter.js              Currency cards, inputs, drag/swipe wiring
+  converter.js              Re-exports `./converter/index.js` (stable import path)
+  converter/
+    index.js                Main conversion view — card list + gestures
+    mount.js                Converter mount + rate row visibility
+    cards.js                Card DOM, inputs, copy/close, drag/swipe wiring
+    states.js               Empty and loading placeholder views
   drag.js                   Touch and mouse drag-and-drop reordering
   swipe.js                  Swipe-to-dismiss gesture handler
   pointer.js                Shared pointer coordinates (touch/mouse) for drag & swipe
-  settings.js               Settings panel, theme/language dropdowns, focus trap
+  settings.js               Re-exports `./settings/index.js` (stable import path)
+  settings/
+    index.js                Settings facade — `syncShellLabels`, open/close, render panel
+    overlay.js              Overlay open/close, focus trap, save confirmation
+    dropdowns.js            Theme and language dropdowns
+    currency.js             Currency list and region groups
   currencies.js             Currency metadata and region groupings
   theme.js                  Theme definitions (10 themes) and runtime application
   haptics.js                Light haptic feedback where supported
@@ -69,11 +83,11 @@ src/
     en.js, es.js, hi.js, ja.js, ko.js, zh.js   Locale JSON modules
 
 assets/
-  ui/                       Small ESM modules exporting inline SVG strings (card icons, chevrons)
+  ui/icons.js               All inline SVG strings (shell, cards, settings; shell icons injected from app.js)
   icon.svg, icon-*.png      PWA icons; favicon.ico, favicon-32.png, apple-touch-icon.png
 
 .github/workflows/
-  deploy.yml                CI — Prettier check, Tailwind build, stamp, deploy, release
+  deploy.yml                CI — Prettier check, pinned Tailwind build, generate sw.js, stamp, deploy
 ```
 
 ## Development
@@ -110,6 +124,18 @@ tailwindcss -i src/styles.css -o style.css --watch
 
 `style.css` is the generated output and should not be edited directly. All custom CSS lives in `src/styles.css`.
 
+### Service worker precache
+
+The deploy workflow runs `node scripts/generate-sw.mjs` after the CSS build and before copying to `dist/`, so **the live site always gets a correct `sw.js`** from the current tree—you do not need to run the script locally for production.
+
+Run it yourself when you change modules or assets under `src/` or `assets/` if you want the **committed** `sw.js` to match (and for accurate local offline/service-worker testing). Same idea as rebuilding `style.css` after editing `src/styles.css`.
+
+```sh
+node scripts/generate-sw.mjs
+```
+
+It reads `sw.template.js` and writes `sw.js`. The precache list follows the `import` graph from `src/app.js` plus every file under `assets/`.
+
 ### Formatting (Prettier)
 
 CI runs `prettier --check` on every deploy. Format locally without a `package.json` (pin matches CI):
@@ -118,7 +144,7 @@ CI runs `prettier --check` on every deploy. Format locally without a `package.js
 npx --yes prettier@3.5.3 --write .
 ```
 
-Generated `style.css` and `dist/` are ignored via `.prettierignore`.
+Generated `style.css`, `sw.js`, and `dist/` are ignored via `.prettierignore`.
 
 ## Deployment
 
@@ -126,10 +152,11 @@ Push to `main`. The GitHub Action automatically:
 
 1. **Bumps the version** if the commit message contains `[patch]`, `[minor]`, or `[major]`
 2. **Checks Prettier** — fails the job if the repo is not formatted
-3. **Builds Tailwind CSS** using the standalone Linux CLI
-4. **Stamps** the version into the app footer and the commit hash into the service worker cache name
-5. **Deploys** to the `gh-pages` branch (served by GitHub Pages)
-6. **Creates a GitHub Release** with auto-generated notes (marked pre-release while the major version is 0)
+3. **Builds Tailwind CSS** using the standalone Linux CLI (release pinned in the workflow file)
+4. **Generates `sw.js`** from `sw.template.js` and the module graph
+5. **Stamps** the version into the app footer and the commit hash into the service worker cache name
+6. **Deploys** to the `gh-pages` branch (served by GitHub Pages)
+7. **Creates a GitHub Release** with auto-generated notes (marked pre-release while the major version is 0)
 
 The workflow can also be triggered manually from the Actions tab via `workflow_dispatch`.
 

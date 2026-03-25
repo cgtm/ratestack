@@ -1,3 +1,4 @@
 # Build output (Tailwind emits root style.css; Pages artifact)
 dist/
 style.css
+sw.js

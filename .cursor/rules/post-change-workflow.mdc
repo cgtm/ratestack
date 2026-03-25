@@ -13,7 +13,7 @@ Deploy runs `prettier --check` (see `.github/workflows/deploy.yml`). After editi
 
 —or `--write` only on paths touched. If you bump the Prettier version in CI, update this command to match.
 
-Respect `.prettierignore` (e.g. generated `style.css`, `dist/`).
+Respect `.prettierignore` (e.g. generated `style.css`, `sw.js`, `dist/`).
 
 ## README
 

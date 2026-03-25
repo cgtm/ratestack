@@ -7,45 +7,7 @@
  *   node scripts/generate-sw.mjs
  */
 const CACHE_NAME = "ratestack-v39";
-const STATIC_ASSETS = [
-  "./",
-  "./assets/apple-touch-icon.png",
-  "./assets/favicon-32.png",
-  "./assets/favicon.ico",
-  "./assets/icon-192.png",
-  "./assets/icon-512.png",
-  "./assets/icon.svg",
-  "./assets/ui/icons.js",
-  "./index.html",
-  "./manifest.json",
-  "./src/api.js",
-  "./src/app.js",
-  "./src/converter.js",
-  "./src/converter/cards.js",
-  "./src/converter/index.js",
-  "./src/converter/mount.js",
-  "./src/converter/states.js",
-  "./src/currencies.js",
-  "./src/drag.js",
-  "./src/haptics.js",
-  "./src/i18n.js",
-  "./src/i18n/en.js",
-  "./src/i18n/es.js",
-  "./src/i18n/hi.js",
-  "./src/i18n/ja.js",
-  "./src/i18n/ko.js",
-  "./src/i18n/zh.js",
-  "./src/pointer.js",
-  "./src/settings.js",
-  "./src/settings/currency.js",
-  "./src/settings/dropdowns.js",
-  "./src/settings/index.js",
-  "./src/settings/overlay.js",
-  "./src/state.js",
-  "./src/swipe.js",
-  "./src/theme.js",
-  "./style.css"
-];
+const STATIC_ASSETS = __STATIC_ASSETS__;
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(STATIC_ASSETS)));
