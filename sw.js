@@ -3,7 +3,7 @@
  * (avoids persisting 4xx/5xx bodies). Offline API requests fall back to last good response.
  * Bump `CACHE_NAME` when shipping so clients drop old bundles (paired with CI stamping this file).
  */
-const CACHE_NAME = "ratestack-v38";
+const CACHE_NAME = "ratestack-v39";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
@@ -27,12 +27,12 @@ const STATIC_ASSETS = [
   "./src/i18n/es.js",
   "./src/i18n/ko.js",
   "./src/i18n/ja.js",
-  "./assets/logo-alt-icon-favicon.ico",
-  "./assets/logo-alt-icon-favicon-32.png",
-  "./assets/logo-alt-icon.svg",
-  "./assets/logo-alt-icon-192.png",
-  "./assets/logo-alt-icon-512.png",
-  "./assets/logo-alt-icon-apple-touch.png",
+  "./assets/favicon.ico",
+  "./assets/favicon-32.png",
+  "./assets/icon.svg",
+  "./assets/icon-192.png",
+  "./assets/icon-512.png",
+  "./assets/apple-touch-icon.png",
   "./assets/ui/card-icons.js",
   "./assets/ui/chevron.js",
 ];

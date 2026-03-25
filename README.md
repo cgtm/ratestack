@@ -70,7 +70,7 @@ src/
 
 assets/
   ui/                       Small ESM modules exporting inline SVG strings (card icons, chevrons)
-  logo-alt-icon*.svg/png    PWA / favicon / touch icons (see index.html & manifest)
+  icon.svg, icon-*.png      PWA icons; favicon.ico, favicon-32.png, apple-touch-icon.png
 
 .github/workflows/
   deploy.yml                CI — Prettier check, Tailwind build, stamp, deploy, release
