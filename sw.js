@@ -3,14 +3,14 @@
  * (avoids persisting 4xx/5xx bodies). Offline API requests fall back to last good response.
  * Bump `CACHE_NAME` when shipping so clients drop old bundles (paired with CI stamping this file).
  */
-const CACHE_NAME = 'ratestack-f5dc711';
+const CACHE_NAME = 'ratestack-6f1afeb';
 const STATIC_ASSETS = [
   './', './index.html', './style.css', './manifest.json',
   './src/app.js', './src/api.js', './src/state.js', './src/currencies.js',
   './src/converter.js', './src/drag.js', './src/swipe.js', './src/haptics.js', './src/settings.js', './src/theme.js',
   './src/i18n.js', './src/i18n/en.js', './src/i18n/zh.js', './src/i18n/hi.js', './src/i18n/es.js', './src/i18n/ko.js', './src/i18n/ja.js',
-  './assets/favicon.ico', './assets/favicon-32.png', './assets/icon.svg',
-  './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png',
+  './assets/logo-alt-icon-favicon.ico', './assets/logo-alt-icon-favicon-32.png', './assets/logo-alt-icon.svg',
+  './assets/logo-alt-icon-192.png', './assets/logo-alt-icon-512.png', './assets/logo-alt-icon-apple-touch.png',
 ];
 
 self.addEventListener('install', (e) => {
