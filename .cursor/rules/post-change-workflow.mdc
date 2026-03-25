@@ -1,0 +1,20 @@
+---
+description: After code changes — Prettier and README (ratestack only)
+alwaysApply: true
+---
+
+# Post-change workflow (this project)
+
+## Prettier
+
+Deploy runs `prettier --check` (see `.github/workflows/deploy.yml`). After editing files that Prettier formats (JS, HTML, CSS, JSON, MD, YAML, etc.), run:
+
+`npx --yes prettier@3.5.3 --write .`
+
+—or `--write` only on paths touched. If you bump the Prettier version in CI, update this command to match.
+
+Respect `.prettierignore` (e.g. generated `style.css`, `dist/`).
+
+## README
+
+Update [README.md](README.md) when the change affects how someone clones, runs, builds, deploys, or uses tooling—not for every trivial code edit.

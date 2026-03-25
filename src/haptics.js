@@ -3,7 +3,10 @@
  * iOS Safari does not expose Vibration API — calls are no-ops there.
  */
 export function haptic(ms = 12) {
-  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+  if (
+    typeof navigator !== "undefined" &&
+    typeof navigator.vibrate === "function"
+  ) {
     navigator.vibrate(ms);
   }
 }

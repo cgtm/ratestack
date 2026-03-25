@@ -3,34 +3,62 @@
  * (avoids persisting 4xx/5xx bodies). Offline API requests fall back to last good response.
  * Bump `CACHE_NAME` when shipping so clients drop old bundles (paired with CI stamping this file).
  */
-const CACHE_NAME = 'ratestack-v35';
+const CACHE_NAME = "ratestack-v38";
 const STATIC_ASSETS = [
-  './', './index.html', './style.css', './manifest.json',
-  './src/app.js', './src/api.js', './src/state.js', './src/currencies.js',
-  './src/converter.js', './src/drag.js', './src/swipe.js', './src/haptics.js', './src/settings.js', './src/theme.js',
-  './src/i18n.js', './src/i18n/en.js', './src/i18n/zh.js', './src/i18n/hi.js', './src/i18n/es.js', './src/i18n/ko.js', './src/i18n/ja.js',
-  './assets/logo-alt-icon-favicon.ico', './assets/logo-alt-icon-favicon-32.png', './assets/logo-alt-icon.svg',
-  './assets/logo-alt-icon-192.png', './assets/logo-alt-icon-512.png', './assets/logo-alt-icon-apple-touch.png',
+  "./",
+  "./index.html",
+  "./style.css",
+  "./manifest.json",
+  "./src/app.js",
+  "./src/api.js",
+  "./src/state.js",
+  "./src/currencies.js",
+  "./src/pointer.js",
+  "./src/converter.js",
+  "./src/drag.js",
+  "./src/swipe.js",
+  "./src/haptics.js",
+  "./src/settings.js",
+  "./src/theme.js",
+  "./src/i18n.js",
+  "./src/i18n/en.js",
+  "./src/i18n/zh.js",
+  "./src/i18n/hi.js",
+  "./src/i18n/es.js",
+  "./src/i18n/ko.js",
+  "./src/i18n/ja.js",
+  "./assets/logo-alt-icon-favicon.ico",
+  "./assets/logo-alt-icon-favicon-32.png",
+  "./assets/logo-alt-icon.svg",
+  "./assets/logo-alt-icon-192.png",
+  "./assets/logo-alt-icon-512.png",
+  "./assets/logo-alt-icon-apple-touch.png",
+  "./assets/ui/card-icons.js",
+  "./assets/ui/chevron.js",
 ];
 
-self.addEventListener('install', (e) => {
+self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(STATIC_ASSETS)));
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
+self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)),
+        ),
+      ),
   );
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
+self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
 
-  if (url.origin === 'https://open.er-api.com') {
+  if (url.origin === "https://open.er-api.com") {
     e.respondWith(
       fetch(e.request)
         .then((res) => {
@@ -40,7 +68,9 @@ self.addEventListener('fetch', (e) => {
           }
           return res;
         })
-        .catch(() => caches.match(e.request).then((cached) => cached || Response.error()))
+        .catch(() =>
+          caches.match(e.request).then((cached) => cached || Response.error()),
+        ),
     );
     return;
   }
