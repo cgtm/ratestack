@@ -3,8 +3,97 @@
  * `container._dragInit` prevents duplicate listeners when `renderConverter` runs again.
  * Alt+Arrow on a focused card duplicates reorder for keyboard users.
  */
-import { store, saveState } from './state.js';
-import { updateRateLabels } from './api.js';
+import { store, saveState } from "./state.js";
+import { updateRateLabels } from "./api.js";
+import { getPointerClientXY } from "./pointer.js";
+
+function getCurrencyCardOrder(container) {
+  return [...container.querySelectorAll(".currency-card")].map(
+    (c) => c.dataset.code,
+  );
+}
+
+function persistCardOrder(container) {
+  store.selected = getCurrencyCardOrder(container);
+  saveState();
+  updateRateLabels();
+}
+
+function measureCardRects(cards) {
+  return cards.map((c) => {
+    const r = c.getBoundingClientRect();
+    return { el: c, top: r.top, height: r.height, mid: r.top + r.height / 2 };
+  });
+}
+
+function resolveDragCardFromEvent(e, container) {
+  const handle = e.target.closest(".drag-handle");
+  if (!handle) return null;
+  const card = handle.closest(".currency-card");
+  if (!card || !container.contains(card)) return null;
+  return card;
+}
+
+function createPlaceholder(heightPx) {
+  const placeholder = document.createElement("div");
+  placeholder.className =
+    "rounded-2xl border-2 border-dashed border-brd opacity-40";
+  placeholder.style.height = heightPx + "px";
+  return placeholder;
+}
+
+function applyFloatingDragStyles(card, rect) {
+  card.style.position = "fixed";
+  card.style.top = rect.top + "px";
+  card.style.left = rect.left + "px";
+  card.style.width = rect.width + "px";
+  card.style.zIndex = "50";
+  card.style.transition = "box-shadow 0.15s, transform 0.15s";
+  card.style.transform = "scale(1.03)";
+  card.style.boxShadow = "0 8px 30px rgba(0,0,0,0.4)";
+}
+
+function clearFloatingDragStyles(card) {
+  card.style.position = "";
+  card.style.top = "";
+  card.style.left = "";
+  card.style.width = "";
+  card.style.zIndex = "";
+  card.style.transition = "";
+  card.style.transform = "";
+  card.style.boxShadow = "";
+}
+
+/**
+ * Moves the dashed placeholder so it tracks the drag midpoint relative to other cards.
+ */
+function repositionPlaceholder(
+  container,
+  placeholder,
+  dragCard,
+  cardRects,
+  dragMid,
+) {
+  const placeholderIdx = [...container.children].indexOf(placeholder);
+
+  for (let i = 0; i < cardRects.length; i++) {
+    const r = cardRects[i];
+    if (r.el === dragCard) continue;
+    const elIdx = [...container.children].indexOf(r.el);
+    if (elIdx === -1) continue;
+
+    const elRect = r.el.getBoundingClientRect();
+    const elMid = elRect.top + elRect.height / 2;
+
+    if (dragMid < elMid && elIdx < placeholderIdx) {
+      container.insertBefore(placeholder, r.el);
+      break;
+    } else if (dragMid > elMid && elIdx > placeholderIdx) {
+      container.insertBefore(placeholder, r.el.nextSibling);
+      break;
+    }
+  }
+}
 
 export function initDragAndDrop(container) {
   if (container._dragInit) return;
@@ -16,131 +105,90 @@ export function initDragAndDrop(container) {
   let offsetY = 0;
   let cardRects = [];
 
-  function getY(e) {
-    return e.touches ? e.touches[0].clientY : e.clientY;
+  function attachGlobalDragListeners() {
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("touchend", onEnd);
+    document.addEventListener("mouseup", onEnd);
+  }
+
+  function detachGlobalDragListeners() {
+    document.removeEventListener("touchmove", onMove);
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("touchend", onEnd);
+    document.removeEventListener("mouseup", onEnd);
   }
 
   function onStart(e) {
-    const handle = e.target.closest('.drag-handle');
-    if (!handle) return;
-    dragCard = handle.closest('.currency-card');
-    if (!dragCard) return;
+    const card = resolveDragCardFromEvent(e, container);
+    if (!card) return;
+    dragCard = card;
 
     e.preventDefault();
 
-    const cards = [...container.querySelectorAll('.currency-card')];
-    cardRects = cards.map((c) => {
-      const r = c.getBoundingClientRect();
-      return { el: c, top: r.top, height: r.height, mid: r.top + r.height / 2 };
-    });
+    const cards = [...container.querySelectorAll(".currency-card")];
+    cardRects = measureCardRects(cards);
 
     const rect = dragCard.getBoundingClientRect();
-    startY = getY(e);
+    startY = getPointerClientXY(e).y;
     offsetY = 0;
 
-    placeholder = document.createElement('div');
-    placeholder.className = 'rounded-2xl border-2 border-dashed border-brd opacity-40';
-    placeholder.style.height = rect.height + 'px';
+    placeholder = createPlaceholder(rect.height);
+    applyFloatingDragStyles(dragCard, rect);
 
-    dragCard.style.position = 'fixed';
-    dragCard.style.top = rect.top + 'px';
-    dragCard.style.left = rect.left + 'px';
-    dragCard.style.width = rect.width + 'px';
-    dragCard.style.zIndex = '50';
-    dragCard.style.transition = 'box-shadow 0.15s, transform 0.15s';
-    dragCard.style.transform = 'scale(1.03)';
-    dragCard.style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)';
-
-    // Lift the card out of the flow so it can float above siblings while dragging.
     dragCard.parentNode.insertBefore(placeholder, dragCard);
     document.body.appendChild(dragCard);
-    document.body.classList.add('dragging');
+    document.body.classList.add("dragging");
 
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('touchend', onEnd);
-    document.addEventListener('mouseup', onEnd);
+    attachGlobalDragListeners();
   }
 
   function onMove(e) {
     if (!dragCard) return;
     e.preventDefault();
 
-    const currentY = getY(e);
+    const currentY = getPointerClientXY(e).y;
     offsetY = currentY - startY;
     const origTop = parseFloat(dragCard.style.top);
     dragCard.style.transform = `translateY(${offsetY}px) scale(1.03)`;
 
-    const dragMid = origTop + offsetY + dragCard.getBoundingClientRect().height / 2;
-
-    const placeholderIdx = [...container.children].indexOf(placeholder);
-
-    for (let i = 0; i < cardRects.length; i++) {
-      const r = cardRects[i];
-      if (r.el === dragCard) continue;
-      const elIdx = [...container.children].indexOf(r.el);
-      if (elIdx === -1) continue;
-
-      const elRect = r.el.getBoundingClientRect();
-      const elMid = elRect.top + elRect.height / 2;
-
-      if (dragMid < elMid && elIdx < placeholderIdx) {
-        container.insertBefore(placeholder, r.el);
-        break;
-      } else if (dragMid > elMid && elIdx > placeholderIdx) {
-        container.insertBefore(placeholder, r.el.nextSibling);
-        break;
-      }
-    }
+    const dragMid =
+      origTop + offsetY + dragCard.getBoundingClientRect().height / 2;
+    repositionPlaceholder(container, placeholder, dragCard, cardRects, dragMid);
   }
 
   function onEnd() {
     if (!dragCard) return;
 
-    document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('touchend', onEnd);
-    document.removeEventListener('mouseup', onEnd);
+    detachGlobalDragListeners();
 
     container.insertBefore(dragCard, placeholder);
     placeholder.remove();
 
-    dragCard.style.position = '';
-    dragCard.style.top = '';
-    dragCard.style.left = '';
-    dragCard.style.width = '';
-    dragCard.style.zIndex = '';
-    dragCard.style.transition = '';
-    dragCard.style.transform = '';
-    dragCard.style.boxShadow = '';
-    document.body.classList.remove('dragging');
+    clearFloatingDragStyles(dragCard);
+    document.body.classList.remove("dragging");
 
-    store.selected = [...container.querySelectorAll('.currency-card')].map((c) => c.dataset.code);
-    saveState();
+    persistCardOrder(container);
 
     dragCard = null;
     placeholder = null;
-
-    updateRateLabels();
   }
 
-  container.addEventListener('touchstart', onStart, { passive: false });
-  container.addEventListener('mousedown', onStart);
+  container.addEventListener("touchstart", onStart, { passive: false });
+  container.addEventListener("mousedown", onStart);
 
-  container.addEventListener('keydown', (e) => {
-    if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
-    const card = e.target.closest('.currency-card');
+  container.addEventListener("keydown", (e) => {
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+    const card = e.target.closest(".currency-card");
     if (!card || !container.contains(card)) return;
     e.preventDefault();
-    if (e.key === 'ArrowUp') {
+    if (e.key === "ArrowUp") {
       const prev = card.previousElementSibling;
       if (prev) container.insertBefore(card, prev);
     } else {
       const next = card.nextElementSibling;
       if (next) container.insertBefore(next, card);
     }
-    store.selected = [...container.querySelectorAll('.currency-card')].map((c) => c.dataset.code);
-    saveState();
-    updateRateLabels();
+    persistCardOrder(container);
   });
 }
