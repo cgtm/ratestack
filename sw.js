@@ -2,39 +2,49 @@
  * Service worker: precaches shell assets; network-first for FX API with cache only on success
  * (avoids persisting 4xx/5xx bodies). Offline API requests fall back to last good response.
  * Bump `CACHE_NAME` when shipping so clients drop old bundles (paired with CI stamping this file).
+ *
+ * `STATIC_ASSETS` is generated — do not edit the array by hand. Run:
+ *   node scripts/generate-sw.mjs
  */
-const CACHE_NAME = "ratestack-f5808c1";
+const CACHE_NAME = "ratestack-1109da8";
 const STATIC_ASSETS = [
   "./",
-  "./index.html",
-  "./style.css",
-  "./manifest.json",
-  "./src/app.js",
-  "./src/api.js",
-  "./src/state.js",
-  "./src/currencies.js",
-  "./src/pointer.js",
-  "./src/converter.js",
-  "./src/drag.js",
-  "./src/swipe.js",
-  "./src/haptics.js",
-  "./src/settings.js",
-  "./src/theme.js",
-  "./src/i18n.js",
-  "./src/i18n/en.js",
-  "./src/i18n/zh.js",
-  "./src/i18n/hi.js",
-  "./src/i18n/es.js",
-  "./src/i18n/ko.js",
-  "./src/i18n/ja.js",
-  "./assets/favicon.ico",
+  "./assets/apple-touch-icon.png",
   "./assets/favicon-32.png",
-  "./assets/icon.svg",
+  "./assets/favicon.ico",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
-  "./assets/apple-touch-icon.png",
-  "./assets/ui/card-icons.js",
-  "./assets/ui/chevron.js",
+  "./assets/icon.svg",
+  "./assets/ui/icons.js",
+  "./index.html",
+  "./manifest.json",
+  "./src/api.js",
+  "./src/app.js",
+  "./src/converter.js",
+  "./src/converter/cards.js",
+  "./src/converter/index.js",
+  "./src/converter/mount.js",
+  "./src/converter/states.js",
+  "./src/currencies.js",
+  "./src/drag.js",
+  "./src/haptics.js",
+  "./src/i18n.js",
+  "./src/i18n/en.js",
+  "./src/i18n/es.js",
+  "./src/i18n/hi.js",
+  "./src/i18n/ja.js",
+  "./src/i18n/ko.js",
+  "./src/i18n/zh.js",
+  "./src/pointer.js",
+  "./src/settings.js",
+  "./src/settings/currency.js",
+  "./src/settings/dropdowns.js",
+  "./src/settings/index.js",
+  "./src/settings/overlay.js",
+  "./src/state.js",
+  "./src/swipe.js",
+  "./src/theme.js",
+  "./style.css"
 ];
 
 self.addEventListener("install", (e) => {

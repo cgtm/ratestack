@@ -2,7 +2,7 @@
  * Application entry: restore persisted state, apply theme and language, wire global UI,
  * register the service worker, and load the converter or empty state.
  *
- * Why `loadState` / `setLang` / `updateSettingsLabels` run before listeners: the shell must
+ * Why `loadState` / `setLang` / `syncShellLabels` run before listeners: the shell must
  * show correct copy (tagline, aria-labels) and theme colors before first paint as much as possible.
  */
 import { store, loadState, hasMinimumCurrencies } from "./state.js";
@@ -18,24 +18,46 @@ import {
   renderEmptyState,
   renderLoadingState,
 } from "./converter.js";
-import {
-  openSettings,
-  closeSettings,
-  updateSettingsLabels,
-} from "./settings.js";
+import { openSettings, closeSettings, syncShellLabels } from "./settings.js";
 import { applyTheme } from "./theme.js";
 import { setLang, t } from "./i18n.js";
 
+import {
+  SHELL_SETTINGS_GEAR_SVG,
+  SHELL_REFRESH_SVG,
+  SHELL_CLOSE_SVG,
+  SHELL_LANGUAGE_GLOBE_SVG,
+  SHELL_THEME_SWATCH_SVG,
+  SHELL_CURRENCIES_BANKNOTE_SVG,
+} from "../assets/ui/icons.js";
+
 const RATE_STATUS_REFRESH_MS = 60 * 1000;
+
+/** Fills `index.html` placeholder spans from `assets/ui/icons.js`. */
+function injectShellIcons() {
+  const slots = [
+    ["shell-icon-settings-gear", SHELL_SETTINGS_GEAR_SVG],
+    ["shell-icon-refresh", SHELL_REFRESH_SVG],
+    ["shell-icon-settings-close", SHELL_CLOSE_SVG],
+    ["shell-icon-language", SHELL_LANGUAGE_GLOBE_SVG],
+    ["shell-icon-theme", SHELL_THEME_SWATCH_SVG],
+    ["shell-icon-currencies", SHELL_CURRENCIES_BANKNOTE_SVG],
+  ];
+  for (const [id, svg] of slots) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = svg;
+  }
+}
 
 function bootstrapShell() {
   loadState();
   applyTheme(store.theme);
   setLang(store.lang);
   document.documentElement.lang = store.lang;
-  updateSettingsLabels();
+  syncShellLabels();
 }
 
+injectShellIcons();
 bootstrapShell();
 
 function refreshRateStatusAndTime() {
