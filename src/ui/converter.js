@@ -6,7 +6,7 @@
  */
 import { store, saveState, hasMinimumCurrencies } from "../data/store.js";
 import { refreshRatesIfNeeded, removeCurrencyFromStore } from "../actions.js";
-import { recalculateCardValues } from "./status.js";
+import { recalculateCardValues, updateDisclaimerUI } from "./status.js";
 import { createCurrencyCard } from "./cards.js";
 import { initDragAndDrop } from "../gestures/drag.js";
 import { initSwipeToDismiss } from "../gestures/swipe.js";
@@ -123,7 +123,10 @@ export function renderLoadingState() {
 function removeCurrency(code) {
   const { hasMinimum } = removeCurrencyFromStore(code);
   if (hasMinimum) {
-    refreshRatesIfNeeded().then(() => renderConverter());
+    refreshRatesIfNeeded().then(() => {
+      renderConverter();
+      updateDisclaimerUI();
+    });
   } else {
     renderEmptyState();
   }
