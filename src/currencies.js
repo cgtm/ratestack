@@ -19,12 +19,15 @@ export const CURRENCY_REGIONS = [
       "RON",
       "BGN",
       "ISK",
+      "RSD",
       "RUB",
       "UAH",
     ],
   },
+  { region: "Central Asia", codes: ["GEL", "KZT"] },
   { region: "East Asia", codes: ["HKD", "TWD", "MOP"] },
   { region: "North America", codes: ["MXN"] },
+  { region: "Central America", codes: ["CRC"] },
   {
     region: "South America",
     codes: ["BRL", "ARS", "CLP", "COP", "PEN", "UYU"],
@@ -46,6 +49,12 @@ export const CURRENCY_REGIONS = [
 ];
 
 export const CURRENCIES = {
+  // Central America
+  CRC: {
+    flag: "\u{1F1E8}\u{1F1F7}",
+    name: "Costa Rican Col\u00F3n",
+    symbol: "\u20A1",
+  },
   // North America
   USD: { flag: "\u{1F1FA}\u{1F1F8}", name: "US Dollar", symbol: "$" },
   CAD: { flag: "\u{1F1E8}\u{1F1E6}", name: "Canadian Dollar", symbol: "C$" },
@@ -81,6 +90,11 @@ export const CURRENCIES = {
     flag: "\u{1F1EE}\u{1F1F8}",
     name: "Icelandic Kr\u00F3na",
     symbol: "kr",
+  },
+  RSD: {
+    flag: "\u{1F1F7}\u{1F1F8}",
+    name: "Serbian Dinar",
+    symbol: "\u0434\u0438\u043D",
   },
   RUB: { flag: "\u{1F1F7}\u{1F1FA}", name: "Russian Ruble", symbol: "\u20BD" },
   UAH: {
@@ -128,6 +142,13 @@ export const CURRENCIES = {
   },
   UGX: { flag: "\u{1F1FA}\u{1F1EC}", name: "Ugandan Shilling", symbol: "USh" },
   ETB: { flag: "\u{1F1EA}\u{1F1F9}", name: "Ethiopian Birr", symbol: "Br" },
+  // Central Asia
+  GEL: { flag: "\u{1F1EC}\u{1F1EA}", name: "Georgian Lari", symbol: "\u20BE" },
+  KZT: {
+    flag: "\u{1F1F0}\u{1F1FF}",
+    name: "Kazakhstani Tenge",
+    symbol: "\u20B8",
+  },
   // East Asia
   JPY: { flag: "\u{1F1EF}\u{1F1F5}", name: "Japanese Yen", symbol: "\u00A5" },
   KRW: {
