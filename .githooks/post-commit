@@ -4,5 +4,12 @@ if ! echo "$MSG" | grep -qE '\[(patch|minor|major)\]'; then
   exit 0
 fi
 
+PENDING="${GIT_DIR:-.git}/PENDING_BUMP"
+if [ -f "$PENDING" ]; then
+  rm "$PENDING"
+  git add package.json package-lock.json
+  git commit --amend --no-edit --no-verify
+fi
+
 VERSION=$(node -p "require('./package.json').version")
 git tag -a "v$VERSION" -m "v$VERSION" 2>/dev/null || true
