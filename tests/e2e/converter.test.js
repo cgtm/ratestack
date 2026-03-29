@@ -17,7 +17,7 @@ test.describe("Converter", () => {
   }) => {
     // Delay the API response so the loading skeleton is observable
     const delay = (route) =>
-      new Promise((r) => setTimeout(r, 600)).then(() => route.continue());
+      new Promise((r) => setTimeout(r, 600)).then(() => route.fallback());
     await page.route(/frankfurter\.app/, delay);
     await page.route("**/open.er-api.com/**", delay);
 
@@ -119,7 +119,7 @@ test.describe("Converter", () => {
     await waitForConverter(page);
 
     // Slow down the next API response so we can observe the spinner
-    const delay = (route) => setTimeout(() => route.continue(), 500);
+    const delay = (route) => setTimeout(() => route.fallback(), 500);
     await page.route(/frankfurter\.app/, delay);
     await page.route("**/open.er-api.com/**", delay);
 
