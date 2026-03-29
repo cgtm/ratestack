@@ -78,17 +78,36 @@ export function syncCurrencyHintAndCount() {
 
 export function renderSelectedStrip(rerenderSettings) {
   const selectedList = document.getElementById("selected-list");
-  const divider = document.getElementById("selected-divider");
   selectedList.innerHTML = "";
 
   if (store.selected.length > 0) {
-    divider.classList.remove("hidden");
     store.selected.forEach((code) => {
-      const opt = createCurrencyOption(code, rerenderSettings);
-      if (opt) selectedList.appendChild(opt);
+      const info = CURRENCIES[code];
+      if (!info) return;
+
+      const pill = document.createElement("div");
+      pill.className =
+        "flex items-center gap-2.5 px-3 py-2 rounded-xl border border-accent bg-[var(--color-accent-bg)] text-[13px] font-semibold select-none";
+
+      pill.innerHTML = `
+        <span class="text-2xl leading-none">${info.flag}</span>
+        <span>${code}</span>
+        <button type="button" class="pill-remove flex items-center justify-center w-5 h-5 rounded-md text-dim/60 hover:text-main hover:bg-surface transition-colors ml-0.5" aria-label="Remove ${code}">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 1.5L8.5 8.5M8.5 1.5L1.5 8.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+          </svg>
+        </button>
+      `;
+
+      pill.querySelector(".pill-remove").addEventListener("click", () => {
+        store.selected = store.selected.filter((c) => c !== code);
+        saveState();
+        rerenderSettings();
+        showSaveConfirmation();
+      });
+
+      selectedList.appendChild(pill);
     });
-  } else {
-    divider.classList.add("hidden");
   }
 }
 

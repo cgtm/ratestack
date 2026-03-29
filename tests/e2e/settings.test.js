@@ -74,10 +74,9 @@ test.describe("Settings", () => {
     await waitForConverter(page);
 
     await openSettings(page);
-    // GBP should be in the selected strip — click it to deselect
+    // GBP should be in the selected strip as a pill — click × to remove
     await page
-      .locator('#selected-list [role="checkbox"][aria-checked="true"]')
-      .filter({ hasText: "GBP" })
+      .locator('#selected-list button[aria-label="Remove GBP"]')
       .click();
 
     await closeSettings(page);
