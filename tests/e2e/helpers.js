@@ -30,7 +30,7 @@ export async function mockRatesApi(page, ratesByBase = {}) {
   const ratesMap = { ...ALL_RATES, ...ratesByBase };
 
   // Frankfurter: GET /latest?from=USD&symbols=EUR,GBP
-  await page.route("**/frankfurter.app/**", (route) => {
+  await page.route(/frankfurter\.app/, (route) => {
     const url = new URL(route.request().url());
     const base = (url.searchParams.get("from") || "USD").toUpperCase();
     const symbols = (url.searchParams.get("symbols") || "")
