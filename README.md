@@ -15,6 +15,7 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 - **Homescreen install** — add via Safari (iOS) or Chrome (Android) for a standalone, full-screen app experience
 - **10 themes** — five dark/light pairs: Default, Glowing, Arctic, Forest, and Ember; plus an Auto option that follows the OS preference
 - **6 languages** — English, Korean, Chinese (Mandarin), Hindi, Spanish, and Japanese, with locale-aware number formatting
+- **Native number formats** — tap the format icon on a card to switch between standard and native grouping (만/억 for CJK currencies; lakh/crore for South Asian currencies) — useful for copying a value to paste elsewhere
 - **Settings saved automatically** — changes apply immediately; a Done button closes the panel
 
 ## Install
@@ -36,8 +37,8 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 - Vanilla JavaScript (ES modules, no framework, no bundler)
 - [Tailwind CSS v4](https://tailwindcss.com) (CLI via `@tailwindcss/cli` devDependency)
 - [Prettier](https://prettier.io) — auto-applied on commit via pre-commit hook
-- [Vitest](https://vitest.dev) — unit tests (100 tests, ~350ms)
-- [Playwright](https://playwright.dev) — E2E tests (42 tests across mobile and desktop viewports)
+- [Vitest](https://vitest.dev) — unit tests (130 tests, ~400ms)
+- [Playwright](https://playwright.dev) — E2E tests (60 tests across mobile and desktop viewports)
 - Service worker for offline caching
 - GitHub Pages for hosting
 - GitHub Actions for CI/CD (unit + E2E tests, build, version stamp, deploy, releases)
@@ -68,11 +69,13 @@ src/
     store.js                Shared state object and localStorage persistence
     numbers.js              Number parsing, formatting, conversion math (cached Intl formatters)
     rates.js                Rate fetching — Frankfurter for ECB currencies, er-api fallback
+    native-format.js        Native number grouping (CJK 万/億, South Asian lakh/crore)
 
   ui/
     shell.js                Shell icon injection and label sync
     converter.js            Main conversion view — card list, empty state, loading skeleton
     cards.js                Card DOM, inputs, copy/close button wiring
+    card-format.js          Per-card value formatting helpers (native vs standard mode)
     status.js               Timestamp, stale/error/offline banners, disclaimer, refresh spinner
     settings.js             Settings overlay — open/close, focus trap, save confirmation
     dropdowns.js            Theme and language picker dropdowns
@@ -95,6 +98,7 @@ tests/
   unit/
     actions.test.js         Rate refresh, currency removal, stale detection
     numbers.test.js         Locale parsing, formatting, conversion math
+    native-format.test.js   Native number grouping (CJK 万/億, lakh/crore)
     rates.test.js           API routing (Frankfurter vs er-api), response parsing, errors
     store.test.js           State persistence, corrupted JSON recovery
     theme.test.js           Theme resolution, CSS variable application
@@ -183,16 +187,16 @@ The workflow can also be triggered manually from the Actions tab via `workflow_d
 
 ### Versioning
 
-Version bumps happen locally before push, keeping `package.json` in sync with git tags. Use the `git c` alias (configured by `npm install`):
+Version bumps happen automatically on commit via git hooks. Include a keyword in any commit message:
 
 ```sh
-git c "fix: something [patch]"    # bumps patch, e.g. 0.9.1 → 0.9.2
-git c "feat: something [minor]"   # bumps minor, e.g. 0.9.2 → 0.10.0
-git c "feat: something [major]"   # bumps major, e.g. 0.10.0 → 1.0.0
-git c "chore: something"          # no bump, deploys as-is
+git commit -m "fix: something [patch]"    # bumps patch, e.g. 0.9.1 → 0.9.2
+git commit -m "feat: something [minor]"   # bumps minor, e.g. 0.9.2 → 0.10.0
+git commit -m "feat: something [major]"   # bumps major, e.g. 0.10.0 → 1.0.0
+git commit -m "chore: something"          # no bump, deploys as-is
 ```
 
-The script bumps `package.json`, stages it, commits, and creates an annotated tag. `push.followTags` (set by `npm install`) pushes the tag alongside the branch automatically.
+The `prepare-commit-msg` hook bumps `package.json` and stages it automatically. The `post-commit` hook creates an annotated tag. `push.followTags` (set by `npm install`) pushes the tag alongside the branch automatically.
 
 - `[patch]` — bug fixes, small tweaks
 - `[minor]` — new features

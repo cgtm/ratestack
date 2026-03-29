@@ -4,8 +4,8 @@
 
 /** All mock rates keyed by base — used by both Frankfurter and er-api responses. */
 const ALL_RATES = {
-  USD: { USD: 1, EUR: 0.92, GBP: 0.79, JPY: 149.5, KRW: 1320 },
-  EUR: { EUR: 1, USD: 1.087, GBP: 0.858, JPY: 162.5, KRW: 1434 },
+  USD: { USD: 1, EUR: 0.92, GBP: 0.79, JPY: 149.5, KRW: 1320, INR: 83.5 },
+  EUR: { EUR: 1, USD: 1.087, GBP: 0.858, JPY: 162.5, KRW: 1434, INR: 90.7 },
 };
 
 /** Mock exchange rate response for USD base (er-api shape, kept for test compatibility). */

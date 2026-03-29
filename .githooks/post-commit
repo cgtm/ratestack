@@ -1,0 +1,8 @@
+#!/bin/sh
+MSG=$(git log -1 --format=%s)
+if ! echo "$MSG" | grep -qE '\[(patch|minor|major)\]'; then
+  exit 0
+fi
+
+VERSION=$(node -p "require('./package.json').version")
+git tag -a "v$VERSION" -m "v$VERSION" 2>/dev/null || true

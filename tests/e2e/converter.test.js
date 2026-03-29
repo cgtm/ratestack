@@ -7,6 +7,10 @@ import {
   cardClose,
 } from "./helpers.js";
 
+function nativeBtn(page, code) {
+  return page.locator(`.currency-card[data-code="${code}"] .native-format-btn`);
+}
+
 test.describe("Converter", () => {
   test.beforeEach(async ({ page }) => {
     await mockRatesApi(page);
@@ -112,6 +116,116 @@ test.describe("Converter", () => {
     await expect(
       page.locator('.currency-card[data-code="EUR"] .card-copy'),
     ).toBeVisible();
+  });
+
+  test.describe("native number format", () => {
+    // KRW rate: 1320/USD. Typing "1" → 1,320 KRW (below 10,000 threshold).
+    // Typing "10" → 13,200 KRW (above threshold).
+    // INR rate: 83.5/USD. Typing "1500" → 125,250 INR (above 100,000 threshold).
+
+    test("native format button hidden when value below threshold", async ({
+      page,
+    }) => {
+      await openWithCurrencies(page, ["USD", "KRW"]);
+      await waitForConverter(page);
+      await cardInput(page, "USD").fill("1");
+      await cardInput(page, "USD").press("Tab");
+      // 1,320 KRW — below 10,000
+      await expect(nativeBtn(page, "KRW")).toBeHidden();
+    });
+
+    test("native format button appears when KRW value reaches threshold", async ({
+      page,
+    }) => {
+      await openWithCurrencies(page, ["USD", "KRW"]);
+      await waitForConverter(page);
+      await cardInput(page, "USD").fill("10");
+      await cardInput(page, "USD").press("Tab");
+      // 13,200 KRW — above 10,000
+      await expect(nativeBtn(page, "KRW")).toBeVisible();
+    });
+
+    test("tapping native format button switches to 만-grouped display", async ({
+      page,
+    }) => {
+      await openWithCurrencies(page, ["USD", "KRW"]);
+      await waitForConverter(page);
+      await cardInput(page, "USD").fill("10");
+      await cardInput(page, "USD").press("Tab");
+      await nativeBtn(page, "KRW").click();
+      // 13,200 → "1만 3,200"
+      await expect(cardInput(page, "KRW")).toHaveValue("1만 3,200");
+    });
+
+    test("tapping native format button again reverts to standard display", async ({
+      page,
+    }) => {
+      await openWithCurrencies(page, ["USD", "KRW"]);
+      await waitForConverter(page);
+      await cardInput(page, "USD").fill("10");
+      await cardInput(page, "USD").press("Tab");
+      await nativeBtn(page, "KRW").click();
+      await nativeBtn(page, "KRW").click();
+      await expect(cardInput(page, "KRW")).toHaveValue("13,200");
+    });
+
+    test("native format button absent on the active (base) card", async ({
+      page,
+    }) => {
+      await openWithCurrencies(page, ["USD", "KRW"]);
+      await waitForConverter(page);
+      // USD is the base card — no native format button regardless of value
+      await expect(nativeBtn(page, "USD")).toBeHidden();
+    });
+
+    test("clicking base card in native mode resets to standard and makes it base", async ({
+      page,
+    }) => {
+      await openWithCurrencies(page, ["USD", "KRW"]);
+      await waitForConverter(page);
+      // Set KRW as base with a high value, then enable native mode on USD
+      await cardInput(page, "USD").fill("10");
+      await cardInput(page, "USD").press("Tab");
+      // KRW is now non-base; put it in native mode
+      await nativeBtn(page, "KRW").click();
+      await expect(cardInput(page, "KRW")).toHaveValue("1만 3,200");
+      // Now click the KRW input to make it the base — native mode should reset
+      await cardInput(page, "KRW").click();
+      // Input should be editable and show a standard numeric value
+      const val = await cardInput(page, "KRW").inputValue();
+      expect(val).not.toContain("만");
+    });
+
+    test("native format button appears for INR when value reaches lakh threshold", async ({
+      page,
+    }) => {
+      await openWithCurrencies(page, ["USD", "INR"]);
+      await waitForConverter(page);
+      await cardInput(page, "USD").fill("1500");
+      await cardInput(page, "USD").press("Tab");
+      // 1500 * 83.5 = 125,250 INR — above 100,000
+      await expect(nativeBtn(page, "INR")).toBeVisible();
+    });
+
+    test("INR native format uses lakh grouping", async ({ page }) => {
+      await openWithCurrencies(page, ["USD", "INR"]);
+      await waitForConverter(page);
+      await cardInput(page, "USD").fill("1500");
+      await cardInput(page, "USD").press("Tab");
+      await nativeBtn(page, "INR").click();
+      // 125,250 → "1,25,250.00"
+      await expect(cardInput(page, "INR")).toHaveValue("1,25,250.00");
+    });
+
+    test("native format button absent for non-native currency (EUR)", async ({
+      page,
+    }) => {
+      await openWithCurrencies(page, ["USD", "EUR"]);
+      await waitForConverter(page);
+      await cardInput(page, "USD").fill("1000000");
+      await cardInput(page, "USD").press("Tab");
+      await expect(nativeBtn(page, "EUR")).toBeHidden();
+    });
   });
 
   test("refresh button triggers spinner", async ({ page }) => {

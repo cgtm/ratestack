@@ -5,11 +5,8 @@
  * All functions read from `store` and write to the DOM — no data mutations.
  */
 import { store, hasMinimumCurrencies } from "../data/store.js";
-import {
-  formatNumber,
-  getRateDisplay,
-  computeConvertedAmounts,
-} from "../data/numbers.js";
+import { getRateDisplay, computeConvertedAmounts } from "../data/numbers.js";
+import { applyCardFormat, updateNativeFormatBtn } from "./card-format.js";
 import { areRatesStale } from "../actions.js";
 import { t, numberLocale } from "../i18n.js";
 
@@ -106,15 +103,17 @@ export function recalculateCardValues() {
 
   for (const code of store.selected) {
     if (code === store.baseCurrency) continue;
-    const input = document.querySelector(
-      `.currency-card[data-code="${code}"] .currency-input`,
-    );
+    const card = document.querySelector(`.currency-card[data-code="${code}"]`);
+    if (!card) continue;
+    const input = card.querySelector(".currency-input");
     if (!input) continue;
 
     if (amounts === null) {
       input.value = "";
+      card.dataset.rawValue = "";
     } else if (amounts[code] !== undefined) {
-      input.value = formatNumber(amounts[code], code);
+      applyCardFormat(card, code, amounts[code]);
+      updateNativeFormatBtn(card, code, amounts[code]);
     }
   }
 }

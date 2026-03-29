@@ -11,6 +11,7 @@ import {
   getRateDisplay,
   parseLocaleAmount,
   normalizeTypingAmount,
+  formatNumber,
 } from "../data/numbers.js";
 import { refreshRatesIfNeeded } from "../actions.js";
 import {
@@ -20,7 +21,13 @@ import {
 } from "./status.js";
 import { hapticSuccess } from "../haptics.js";
 import { currencyName, t } from "../i18n.js";
-import { CLOSE_SVG, COPY_SVG, GRIP_SVG } from "../../assets/ui/icons.js";
+import {
+  CLOSE_SVG,
+  COPY_SVG,
+  GRIP_SVG,
+  NATIVE_FORMAT_SVG,
+} from "../../assets/ui/icons.js";
+import { applyCardFormat, updateNativeFormatBtn } from "./card-format.js";
 
 const CARD_BASE =
   "currency-card border rounded-2xl transition-[border-color,box-shadow] duration-200 relative overflow-hidden";
@@ -76,6 +83,9 @@ function buildCardMarkup({ info, code, isActive, rateText, inputLabel }) {
             aria-label="${inputLabel}"
             ${isActive && store.baseAmount ? `value="${store.baseAmount}"` : ""}
           >
+          <button type="button" class="native-format-btn hidden shrink-0 self-center text-dim/40 hover:text-dim transition-colors p-1 -mr-1" aria-label="Switch to native number format">
+            ${NATIVE_FORMAT_SVG}
+          </button>
         </div>
         <span class="currency-rate text-[11px] main-view-muted mt-2 block ${rateText ? "" : "hidden"}">${rateText}</span>
       </div>
@@ -86,6 +96,16 @@ function attachInputListeners(card, code, input) {
   input.addEventListener("focus", () => {
     clearActiveStyling();
     applyActiveStyling(card);
+    // Reset native mode — base card is always editable in standard format
+    if (card.dataset.native === "true") {
+      card.dataset.native = "false";
+      input.readOnly = false;
+      const rawValue = parseFloat(card.dataset.rawValue);
+      if (!isNaN(rawValue)) input.value = formatNumber(rawValue, code);
+      card
+        .querySelector(".native-format-btn")
+        ?.setAttribute("aria-label", "Switch to native number format");
+    }
     store.baseCurrency = code;
     store.baseAmount = parseLocaleAmount(input.value);
     input.value = store.baseAmount;
@@ -164,6 +184,7 @@ export function createCurrencyCard(code, onRemove) {
   const card = document.createElement("div");
   card.className = `${CARD_BASE} ${isActive ? CARD_ACTIVE : CARD_INACTIVE}`;
   card.dataset.code = code;
+  card.dataset.native = "false";
   card.tabIndex = 0;
   card.innerHTML = buildCardMarkup({
     info,
@@ -179,6 +200,23 @@ export function createCurrencyCard(code, onRemove) {
   card
     .querySelector(".card-close")
     .addEventListener("click", () => onRemove(code));
+
+  const nativeBtn = card.querySelector(".native-format-btn");
+  if (nativeBtn) {
+    nativeBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const isNative = card.dataset.native === "true";
+      card.dataset.native = String(!isNative);
+      const rawValue = parseFloat(card.dataset.rawValue);
+      if (!isNaN(rawValue)) applyCardFormat(card, code, rawValue);
+      nativeBtn.setAttribute(
+        "aria-label",
+        !isNative
+          ? "Switch to standard number format"
+          : "Switch to native number format",
+      );
+    });
+  }
 
   return card;
 }
