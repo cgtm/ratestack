@@ -24,7 +24,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "prepare": "git config core.hooksPath .githooks && git config push.followTags true",
+    "prepare": "git config core.hooksPath .githooks && git config push.followTags true && git config alias.c '!npm run commit --'",
+    "commit": "node scripts/commit.mjs",
     "dev": "python3 -m http.server 8080",
     "build:css": "tailwindcss -i src/styles.css -o style.css --minify",
     "build:sw": "node scripts/generate-sw.mjs",

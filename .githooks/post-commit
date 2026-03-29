@@ -1,9 +1,0 @@
-#!/bin/sh
-MSG=$(git log -1 --format='%s')
-
-case "$MSG" in
-  *\[major\]*|*\[minor\]*|*\[patch\]*)
-    VERSION=$(node -p "require('./package.json').version")
-    git tag -a "v${VERSION}" -m "v${VERSION}"
-    ;;
-esac
