@@ -50,7 +50,7 @@ export function applyCardFormat(card, code, value) {
     symbol.classList.toggle("opacity-0", nativeActive && hasCurrencyUnit(code));
   }
 
-  fitInputFontSize(input);
+  fitInputFontSize(input, nativeActive);
 }
 
 const FONT_SIZE_MAX = 32;
@@ -58,9 +58,16 @@ const FONT_SIZE_MIN = 14;
 
 /**
  * Shrink the input font size until the text fits within its container.
- * Reading scrollWidth forces a synchronous layout — intentional, we need the real measurement.
+ * Only active in native mode where values are genuinely long.
+ * Resets to the CSS default when not in native mode.
  */
-function fitInputFontSize(input) {
+function fitInputFontSize(input, nativeActive) {
+  if (!nativeActive) {
+    input.style.fontSize = "";
+    return;
+  }
+  input.style.fontSize = "";
+  if (input.scrollWidth <= input.clientWidth) return;
   input.style.fontSize = `${FONT_SIZE_MAX}px`;
   for (let size = FONT_SIZE_MAX; size > FONT_SIZE_MIN; size--) {
     if (input.scrollWidth <= input.clientWidth) break;
