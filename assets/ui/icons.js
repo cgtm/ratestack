@@ -27,6 +27,9 @@ export const GRIP_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="c
 
 // --- Settings (dropdowns + currency list) ---
 
+/** Native format toggle — cycle/swap icon for the per-card native number format button. */
+export const NATIVE_FORMAT_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>`;
+
 export const CHEVRON_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
 
 /**
