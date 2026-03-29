@@ -1,87 +1,62 @@
 /**
  * Application entry: restore persisted state, apply theme and language, wire global UI,
  * register the service worker, and load the converter or empty state.
- *
- * Why `loadState` / `setLang` / `syncShellLabels` run before listeners: the shell must
- * show correct copy (tagline, aria-labels) and theme colors before first paint as much as possible.
  */
-import { store, loadState, hasMinimumCurrencies } from "./state.js";
-import {
-  fetchRates,
-  updateRateStatusUI,
-  updateTimestamp,
-  recalculate,
-  updateRateLabels,
-} from "./api.js";
+import { store, loadState, hasMinimumCurrencies } from "./data/store.js";
+import { resetNumberCache } from "./data/numbers.js";
+import { refreshRates } from "./actions.js";
 import {
   renderConverter,
   renderEmptyState,
   renderLoadingState,
-} from "./converter.js";
-import { openSettings, closeSettings, syncShellLabels } from "./settings.js";
-import { applyTheme } from "./theme.js";
-import { setLang, t } from "./i18n.js";
-
+} from "./ui/converter.js";
 import {
-  SHELL_SETTINGS_GEAR_SVG,
-  SHELL_REFRESH_SVG,
-  SHELL_CLOSE_SVG,
-  SHELL_LANGUAGE_GLOBE_SVG,
-  SHELL_THEME_SWATCH_SVG,
-  SHELL_CURRENCIES_BANKNOTE_SVG,
-} from "../assets/ui/icons.js";
+  updateRateStatusUI,
+  updateTimestamp,
+  updateDisclaimerUI,
+  recalculateCardValues,
+  updateRateLabels,
+  setRefreshSpinning,
+  flashRefreshError,
+} from "./ui/status.js";
+import {
+  injectShellIcons,
+  syncShellLabels,
+  showUpdateBanner,
+} from "./ui/shell.js";
+import { openSettings, closeSettings } from "./ui/settings.js";
+import { applyTheme } from "./theme.js";
+import { setLang } from "./i18n.js";
 
 const RATE_STATUS_REFRESH_MS = 60 * 1000;
 
-/** Fills `index.html` placeholder spans from `assets/ui/icons.js`. */
-function injectShellIcons() {
-  const slots = [
-    ["shell-icon-settings-gear", SHELL_SETTINGS_GEAR_SVG],
-    ["shell-icon-refresh", SHELL_REFRESH_SVG],
-    ["shell-icon-settings-close", SHELL_CLOSE_SVG],
-    ["shell-icon-language", SHELL_LANGUAGE_GLOBE_SVG],
-    ["shell-icon-theme", SHELL_THEME_SWATCH_SVG],
-    ["shell-icon-currencies", SHELL_CURRENCIES_BANKNOTE_SVG],
-  ];
-  for (const [id, svg] of slots) {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = svg;
-  }
-}
+/* ---------- Bootstrap ---------- */
 
-function bootstrapShell() {
+function bootstrap() {
   loadState();
   applyTheme(store.theme);
   setLang(store.lang);
   document.documentElement.lang = store.lang;
+  injectShellIcons();
   syncShellLabels();
 }
 
-injectShellIcons();
-bootstrapShell();
+bootstrap();
 
-function refreshRateStatusAndTime() {
+/* ---------- Rate fetch with UI feedback ---------- */
+
+async function fetchWithSpinner() {
+  setRefreshSpinning(true);
+  const result = await refreshRates();
+  setRefreshSpinning(false);
+  if (result.error) flashRefreshError();
   updateRateStatusUI();
   updateTimestamp();
+  updateDisclaimerUI();
+  return result;
 }
 
-/** Shown when a new SW takes control; we avoid auto-reload so the user is not interrupted mid-edit. */
-function showUpdateBanner() {
-  const el = document.getElementById("update-banner");
-  if (!el) return;
-  el.classList.remove("hidden");
-
-  const reloadBtn = el.querySelector("#update-reload");
-  if (reloadBtn) {
-    reloadBtn.textContent = t("update.reload");
-    reloadBtn.onclick = () => {
-      window.location.reload();
-    };
-  }
-
-  const msg = el.querySelector("#update-banner-text");
-  if (msg) msg.textContent = t("update.banner");
-}
+/* ---------- Settings chrome ---------- */
 
 function wireSettingsChrome() {
   document
@@ -90,10 +65,15 @@ function wireSettingsChrome() {
   document
     .getElementById("settings-close")
     .addEventListener("click", closeSettings);
+  document
+    .getElementById("settings-done")
+    .addEventListener("click", closeSettings);
   document.getElementById("settings-overlay").addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeSettings();
   });
 }
+
+/* ---------- Refresh button ---------- */
 
 function acknowledgeRefreshTap() {
   const btn = document.getElementById("refresh-btn");
@@ -111,14 +91,12 @@ function acknowledgeRefreshTap() {
 function wireRefreshButton() {
   document.getElementById("refresh-btn").addEventListener("click", () => {
     acknowledgeRefreshTap();
-    fetchRates();
+    fetchWithSpinner();
   });
 }
 
-/**
- * First `controllerchange` fires when this page first gets a controlling SW — skip banner.
- * Later `controllerchange` means a new worker replaced the old one (deploy); show banner.
- */
+/* ---------- Service worker ---------- */
+
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
@@ -137,24 +115,35 @@ function registerServiceWorker() {
   });
 }
 
+/* ---------- Initial view ---------- */
+
 function bootstrapInitialView() {
   if (hasMinimumCurrencies()) {
     renderLoadingState();
-    refreshRateStatusAndTime();
-    fetchRates().then(() => {
+    updateRateStatusUI();
+    updateTimestamp();
+    fetchWithSpinner().then(() => {
       renderConverter();
-      refreshRateStatusAndTime();
+      updateRateStatusUI();
+      updateTimestamp();
     });
   } else {
     renderEmptyState();
   }
 }
 
-/** OS / browser locale changed — refresh Intl-based numbers and “rates updated …” without reload. */
+/* ---------- Global listeners ---------- */
+
+function refreshRateStatusAndTime() {
+  updateRateStatusUI();
+  updateTimestamp();
+}
+
 function onWindowLanguageChange() {
+  resetNumberCache();
   refreshRateStatusAndTime();
   if (hasMinimumCurrencies()) {
-    recalculate();
+    recalculateCardValues();
     updateRateLabels();
   }
 }
@@ -163,8 +152,17 @@ function wireGlobalListeners() {
   window.addEventListener("online", refreshRateStatusAndTime);
   window.addEventListener("offline", refreshRateStatusAndTime);
   window.addEventListener("languagechange", onWindowLanguageChange);
-  setInterval(() => refreshRateStatusAndTime(), RATE_STATUS_REFRESH_MS);
+  setInterval(refreshRateStatusAndTime, RATE_STATUS_REFRESH_MS);
+
+  // Re-apply theme when OS dark/light preference changes (for "auto" theme)
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", () => {
+      if (store.theme === "auto") applyTheme("auto");
+    });
 }
+
+/* ---------- Wire everything ---------- */
 
 wireSettingsChrome();
 wireRefreshButton();

@@ -1,0 +1,42 @@
+{
+  "name": "ratestack",
+  "description": "Fast, minimal currency converter PWA for mobile homescreens.",
+  "private": true,
+  "type": "module",
+  "author": "Cam McVey <cam.mcvey@gmail.com",
+  "license": "MIT",
+  "homepage": "https://cgtm.github.io/ratestack/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cgtm/ratestack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cgtm/ratestack/issues"
+  },
+  "keywords": [
+    "currency",
+    "converter",
+    "pwa",
+    "exchange-rates"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "build:css": "tailwindcss -i src/styles.css -o style.css --minify",
+    "build:sw": "node scripts/generate-sw.mjs",
+    "build": "npm run build:css && npm run build:sw",
+    "format": "npx --yes prettier@3.5.3 --write .",
+    "format:check": "npx --yes prettier@3.5.3 --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:all": "vitest run && playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "happy-dom": "^17.4.4",
+    "vitest": "^3.1.1"
+  }
+}
