@@ -16,7 +16,7 @@ const OPTION_CLASS =
 
 function langOptionHTML(lang) {
   return `
-    <span class="text-lg shrink-0">${lang.flag}</span>
+    <span class="text-[20px] leading-none shrink-0">${lang.flag}</span>
     <span class="text-[13px] font-medium text-main">${lang.label}</span>
   `;
 }

@@ -117,7 +117,7 @@
       <footer
         class="flex items-center justify-center gap-2 pt-8 pb-2 text-[11px] text-dim/70"
       >
-        <span id="app-version">v0.11.3</span>
+        <span id="app-version">v0.11.4</span>
         <span>·</span>
         <a
           href="https://github.com/cgtm/ratestack/issues"
@@ -202,17 +202,16 @@
               Currencies
             </p>
           </div>
+          <div
+            id="selected-list"
+            class="flex flex-wrap gap-2 w-full empty:hidden mb-2"
+          ></div>
           <div class="flex items-baseline justify-between mb-3 shrink-0">
             <p class="settings-hint text-[13px] text-dim">
               Select 2–5 currencies
             </p>
             <span id="settings-count" class="text-[13px] text-dim"></span>
           </div>
-          <div
-            id="selected-list"
-            class="flex flex-col gap-1.5 shrink-0 empty:hidden mb-3"
-          ></div>
-          <div class="h-[2px] bg-brd shrink-0 mb-3" id="selected-divider"></div>
           <div
             id="currency-list"
             class="flex flex-col gap-1.5 overflow-y-auto overscroll-contain pb-4"
