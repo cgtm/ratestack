@@ -18,13 +18,21 @@ export const NATIVE_FORMAT_CURRENCIES = new Set([
 ]);
 
 const CJK_UNITS = {
-  KRW: { man: "만", eok: "억", jo: "조" },
-  JPY: { man: "万", eok: "億", jo: "兆" },
-  CNY: { man: "万", eok: "亿", jo: "兆" },
-  HKD: { man: "萬", eok: "億", jo: "兆" },
-  TWD: { man: "萬", eok: "億", jo: "兆" },
-  MOP: { man: "萬", eok: "億", jo: "兆" },
+  KRW: { man: "만", eok: "억", jo: "조", currency: "원" },
+  JPY: { man: "万", eok: "億", jo: "兆", currency: "円" },
+  CNY: { man: "万", eok: "亿", jo: "兆", currency: "元" },
+  HKD: { man: "萬", eok: "億", jo: "兆", currency: "元" },
+  TWD: { man: "萬", eok: "億", jo: "兆", currency: "元" },
+  MOP: { man: "萬", eok: "億", jo: "兆", currency: "元" },
 };
+
+/**
+ * Returns true if this currency appends a unit suffix in native format.
+ * Used by card-format.js to suppress the left-side symbol without a content shift.
+ */
+export function hasCurrencyUnit(code) {
+  return code in CJK_UNITS;
+}
 
 const CJK_THRESHOLD = 10_000;
 const LAKH_THRESHOLD = 100_000;
@@ -59,7 +67,7 @@ function formatCJK(value, code) {
   if (man) parts.push(man.toLocaleString() + units.man);
   if (rem || !parts.length) parts.push(rem.toLocaleString());
 
-  return sign + parts.join(" ");
+  return sign + parts.join(" ") + units.currency;
 }
 
 const _lakhFormatter = new Intl.NumberFormat("en-IN", {

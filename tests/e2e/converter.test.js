@@ -153,8 +153,8 @@ test.describe("Converter", () => {
       await cardInput(page, "USD").fill("10");
       await cardInput(page, "USD").press("Tab");
       await nativeBtn(page, "KRW").click();
-      // 13,200 → "1만 3,200"
-      await expect(cardInput(page, "KRW")).toHaveValue("1만 3,200");
+      // 13,200 → "1만 3,200원"
+      await expect(cardInput(page, "KRW")).toHaveValue("1만 3,200원");
     });
 
     test("tapping native format button again reverts to standard display", async ({
@@ -188,12 +188,13 @@ test.describe("Converter", () => {
       await cardInput(page, "USD").press("Tab");
       // KRW is now non-base; put it in native mode
       await nativeBtn(page, "KRW").click();
-      await expect(cardInput(page, "KRW")).toHaveValue("1만 3,200");
+      await expect(cardInput(page, "KRW")).toHaveValue("1만 3,200원");
       // Now click the KRW input to make it the base — native mode should reset
       await cardInput(page, "KRW").click();
-      // Input should be editable and show a standard numeric value
+      // Input should be editable and show a standard numeric value (no 만/원)
       const val = await cardInput(page, "KRW").inputValue();
       expect(val).not.toContain("만");
+      expect(val).not.toContain("원");
     });
 
     test("native format button appears for INR when value reaches lakh threshold", async ({

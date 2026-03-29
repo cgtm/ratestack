@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   hasNativeFormat,
   formatNative,
+  hasCurrencyUnit,
   NATIVE_FORMAT_CURRENCIES,
 } from "../../src/data/native-format.js";
 
@@ -83,40 +84,39 @@ describe("formatNative — KRW", () => {
   });
 
   it("formats exactly 1만 (10,000)", () => {
-    expect(formatNative(10_000, "KRW")).toBe("1만");
+    expect(formatNative(10_000, "KRW")).toBe("1만원");
   });
 
   it("formats 만 with remainder", () => {
-    expect(formatNative(12_345, "KRW")).toBe("1만 2,345");
+    expect(formatNative(12_345, "KRW")).toBe("1만 2,345원");
   });
 
   it("formats large 만 values", () => {
-    expect(formatNative(1_234_567, "KRW")).toBe("123만 4,567");
+    expect(formatNative(1_234_567, "KRW")).toBe("123만 4,567원");
   });
 
   it("formats exactly 1억 (100,000,000)", () => {
-    expect(formatNative(100_000_000, "KRW")).toBe("1억");
+    expect(formatNative(100_000_000, "KRW")).toBe("1억원");
   });
 
   it("formats 억 + 만 + remainder", () => {
-    expect(formatNative(123_456_789, "KRW")).toBe("1억 2,345만 6,789");
+    expect(formatNative(123_456_789, "KRW")).toBe("1억 2,345만 6,789원");
   });
 
   it("formats exactly 1조 (1,000,000,000,000)", () => {
-    expect(formatNative(1_000_000_000_000, "KRW")).toBe("1조");
+    expect(formatNative(1_000_000_000_000, "KRW")).toBe("1조원");
   });
 
   it("formats 조 + 억", () => {
-    expect(formatNative(1_500_000_000_000, "KRW")).toBe("1조 5,000억");
+    expect(formatNative(1_500_000_000_000, "KRW")).toBe("1조 5,000억원");
   });
 
   it("omits zero intermediate units", () => {
-    // 1억 0만 500 → "1억 500" (no "0만")
-    expect(formatNative(100_000_500, "KRW")).toBe("1억 500");
+    expect(formatNative(100_000_500, "KRW")).toBe("1억 500원");
   });
 
   it("handles negative values", () => {
-    expect(formatNative(-12_345, "KRW")).toBe("-1만 2,345");
+    expect(formatNative(-12_345, "KRW")).toBe("-1만 2,345원");
   });
 });
 
@@ -124,15 +124,15 @@ describe("formatNative — KRW", () => {
 
 describe("formatNative — JPY", () => {
   it("formats 万 with remainder", () => {
-    expect(formatNative(12_345, "JPY")).toBe("1万 2,345");
+    expect(formatNative(12_345, "JPY")).toBe("1万 2,345円");
   });
 
   it("formats exactly 1億", () => {
-    expect(formatNative(100_000_000, "JPY")).toBe("1億");
+    expect(formatNative(100_000_000, "JPY")).toBe("1億円");
   });
 
   it("formats 兆", () => {
-    expect(formatNative(1_000_000_000_000, "JPY")).toBe("1兆");
+    expect(formatNative(1_000_000_000_000, "JPY")).toBe("1兆円");
   });
 });
 
@@ -140,7 +140,7 @@ describe("formatNative — JPY", () => {
 
 describe("formatNative — CNY", () => {
   it("uses simplified Chinese units (亿 not 億)", () => {
-    expect(formatNative(100_000_000, "CNY")).toBe("1亿");
+    expect(formatNative(100_000_000, "CNY")).toBe("1亿元");
   });
 });
 
@@ -165,5 +165,27 @@ describe("formatNative — INR (lakh)", () => {
 
   it("applies to other lakh currencies (PKR)", () => {
     expect(formatNative(1_234_567, "PKR")).toBe("12,34,567.00");
+  });
+});
+
+// ─── hasCurrencyUnit ──────────────────────────────────────────────────────────
+
+describe("hasCurrencyUnit", () => {
+  it("returns true for all CJK currencies", () => {
+    for (const code of ["KRW", "JPY", "CNY", "HKD", "TWD", "MOP"]) {
+      expect(hasCurrencyUnit(code)).toBe(true);
+    }
+  });
+
+  it("returns false for lakh currencies", () => {
+    for (const code of ["INR", "PKR", "BDT", "LKR", "NPR"]) {
+      expect(hasCurrencyUnit(code)).toBe(false);
+    }
+  });
+
+  it("returns false for Western currencies", () => {
+    for (const code of ["USD", "EUR", "GBP"]) {
+      expect(hasCurrencyUnit(code)).toBe(false);
+    }
   });
 });

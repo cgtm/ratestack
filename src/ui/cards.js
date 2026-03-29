@@ -74,7 +74,7 @@ function buildCardMarkup({ info, code, isActive, rateText, inputLabel }) {
           </div>
         </div>
         <div class="flex items-baseline gap-1">
-          <span class="text-[32px] font-semibold text-dim select-none">${info.symbol}</span>
+          <span class="card-symbol text-[32px] font-semibold text-dim select-none transition-opacity duration-150">${info.symbol}</span>
           <input
             class="currency-input flex-1 min-w-0 bg-transparent border-none outline-none text-main text-[32px] font-semibold font-sans tracking-[-0.5px] caret-accent placeholder:text-brd"
             type="text"
@@ -105,6 +105,7 @@ function attachInputListeners(card, code, input) {
       card
         .querySelector(".native-format-btn")
         ?.setAttribute("aria-label", "Switch to native number format");
+      card.querySelector(".card-symbol")?.classList.remove("opacity-0");
     }
     store.baseCurrency = code;
     store.baseAmount = parseLocaleAmount(input.value);
