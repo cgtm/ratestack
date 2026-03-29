@@ -6,7 +6,7 @@
  * `STATIC_ASSETS` is generated — do not edit the array by hand. Run:
  *   node scripts/generate-sw.mjs
  */
-const CACHE_NAME = "ratestack-d52ebb8";
+const CACHE_NAME = "ratestack-2943cf4";
 const STATIC_ASSETS = [
   "./",
   "./assets/apple-touch-icon.png",
