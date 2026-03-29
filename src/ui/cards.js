@@ -106,6 +106,7 @@ function attachInputListeners(card, code, input) {
         .querySelector(".native-format-btn")
         ?.setAttribute("aria-label", "Switch to native number format");
       card.querySelector(".card-symbol")?.classList.remove("opacity-0");
+      input.style.fontSize = "";
     }
     store.baseCurrency = code;
     store.baseAmount = parseLocaleAmount(input.value);
