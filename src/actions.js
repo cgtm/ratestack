@@ -49,6 +49,9 @@ export async function refreshRatesIfNeeded() {
   const base = store.baseCurrency || store.selected[0];
   if (!base || store.selected.length < 2) return { ok: false };
   if (hasCompleteRates(base, store.selected, store.rates)) {
+    store.ratesSource = usesFrankfurter(base, store.selected)
+      ? "frankfurter"
+      : "er-api";
     return { ok: true, cached: true };
   }
   return refreshRates();

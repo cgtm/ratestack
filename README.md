@@ -10,14 +10,12 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 - **2–5 currencies** — pick your own set from 60+ currencies across 10 regions
 - **Drag to reorder** — hold the grip handle to rearrange cards
 - **Swipe to remove** — swipe a card left to remove it from your set
-- **Close button** — tap the X on any card to remove it quickly
-- **Live exchange rates** — fetched from [Open Exchange Rates API](https://open.er-api.com), refreshable on demand
+- **Live exchange rates** — fetched from [Frankfurter](https://frankfurter.dev) (ECB data, no auth) for major currencies, with automatic fallback to [ExchangeRate-API](https://www.exchangerate-api.com) for exotic currencies; refreshable on demand
 - **Offline support** — service worker caches the app and last-fetched rates
 - **Homescreen install** — add via Safari (iOS) or Chrome (Android) for a standalone, full-screen app experience
-- **10 themes** — five dark/light pairs: Default, Glowing, Arctic, Forest, and Ember
+- **10 themes** — five dark/light pairs: Default, Glowing, Arctic, Forest, and Ember; plus an Auto option that follows the OS preference
 - **6 languages** — English, Korean, Chinese (Mandarin), Hindi, Spanish, and Japanese, with locale-aware number formatting
-- **Settings saved** — inline confirmation whenever preferences change
-- **Version footer** — version number and GitHub Issues link in the main view
+- **Settings saved automatically** — changes apply immediately; a Done button closes the panel
 
 ## Install
 
@@ -35,12 +33,14 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 
 ## Tech Stack
 
-- Vanilla JavaScript (ES modules, no framework)
-- [Tailwind CSS v4](https://tailwindcss.com) (standalone CLI build in CI; optional Homebrew CLI locally)
-- [Prettier](https://prettier.io) — formatting verified in CI (`npx`); no `package.json` required for local use
+- Vanilla JavaScript (ES modules, no framework, no bundler)
+- [Tailwind CSS v4](https://tailwindcss.com) (CLI via `@tailwindcss/cli` devDependency)
+- [Prettier](https://prettier.io) — auto-applied on commit via pre-commit hook
+- [Vitest](https://vitest.dev) — unit tests (100 tests, ~350ms)
+- [Playwright](https://playwright.dev) — E2E tests (42 tests across mobile and desktop viewports)
 - Service worker for offline caching
 - GitHub Pages for hosting
-- GitHub Actions for CI/CD (format check, build, version tagging, deploy, releases)
+- GitHub Actions for CI/CD (unit + E2E tests, build, version stamp, deploy, releases)
 
 ## Project Structure
 
@@ -50,122 +50,150 @@ style.css                   Built CSS output (generated, do not edit)
 sw.template.js              Service worker source (STATIC_ASSETS filled by script)
 sw.js                       Generated service worker — do not edit by hand
 manifest.json               PWA manifest for homescreen install
-.prettierignore             Excludes generated CSS, sw.js, and build output from Prettier
 
 scripts/
   generate-sw.mjs           Builds sw.js precache list from src/app.js imports + assets/
+  commit.mjs                Version-aware commit wrapper (used via git c alias)
 
 src/
-  app.js                    Entry — bootstrap, wiring, service worker registration
-  state.js                  Shared store, localStorage persistence, number formatting
-  api.js                    Rate fetching, conversion math, timestamp / status UI
-  converter.js              Re-exports `./converter/index.js` (stable import path)
-  converter/
-    index.js                Main conversion view — card list + gestures
-    mount.js                Converter mount + rate row visibility
-    cards.js                Card DOM, inputs, copy/close, drag/swipe wiring
-    states.js               Empty and loading placeholder views
-  drag.js                   Touch and mouse drag-and-drop reordering
-  swipe.js                  Swipe-to-dismiss gesture handler
-  pointer.js                Shared pointer coordinates (touch/mouse) for drag & swipe
-  settings.js               Re-exports `./settings/index.js` (stable import path)
-  settings/
-    index.js                Settings facade — `syncShellLabels`, open/close, render panel
-    overlay.js              Overlay open/close, focus trap, save confirmation
-    dropdowns.js            Theme and language dropdowns
-    currency.js             Currency list and region groups
+  app.js                    Entry — bootstrap, wiring, global listeners, service worker registration
+  actions.js                Coordination layer — bridges data and UI, owns rate fetch logic
   currencies.js             Currency metadata and region groupings
-  theme.js                  Theme definitions (10 themes) and runtime application
+  theme.js                  Theme definitions (10 themes + auto) and runtime application
   haptics.js                Light haptic feedback where supported
   i18n.js                   i18n orchestrator — language state, translation lookup
   styles.css                Tailwind v4 source CSS (@theme, custom styles)
+
+  data/
+    store.js                Shared state object and localStorage persistence
+    numbers.js              Number parsing, formatting, conversion math (cached Intl formatters)
+    rates.js                Rate fetching — Frankfurter for ECB currencies, er-api fallback
+
+  ui/
+    shell.js                Shell icon injection and label sync
+    converter.js            Main conversion view — card list, empty state, loading skeleton
+    cards.js                Card DOM, inputs, copy/close button wiring
+    status.js               Timestamp, stale/error/offline banners, disclaimer, refresh spinner
+    settings.js             Settings overlay — open/close, focus trap, save confirmation
+    dropdowns.js            Theme and language picker dropdowns
+    currency-list.js        Currency selection list, selected strip, region groups
+
+  gestures/
+    drag.js                 Touch and mouse drag-and-drop reordering
+    swipe.js                Swipe-to-dismiss gesture handler
+    pointer.js              Shared pointer coordinates (touch/mouse) for drag & swipe
+
   i18n/
-    en.js, es.js, hi.js, ja.js, ko.js, zh.js   Locale JSON modules
+    en.js, es.js, hi.js, ja.js, ko.js, zh.js   Locale string modules
 
 assets/
-  ui/icons.js               All inline SVG strings (shell, cards, settings; shell icons injected from app.js)
+  ui/icons.js               All inline SVG strings (shell, cards, settings)
   icon.svg, icon-*.png      PWA icons; favicon.ico, favicon-32.png, apple-touch-icon.png
 
+tests/
+  setup.js                  Vitest global setup (localStorage stub)
+  unit/
+    actions.test.js         Rate refresh, currency removal, stale detection
+    numbers.test.js         Locale parsing, formatting, conversion math
+    rates.test.js           API routing (Frankfurter vs er-api), response parsing, errors
+    store.test.js           State persistence, corrupted JSON recovery
+    theme.test.js           Theme resolution, CSS variable application
+  e2e/
+    helpers.js              Shared fixtures — API mocks, localStorage seeding, selectors
+    converter.test.js       Conversion flow, card interactions, loading states
+    settings.test.js        Settings panel, currency selection, theme/language switching
+    offline.test.js         Offline banner, reconnect, API error states
+
 .github/workflows/
-  deploy.yml                CI — Prettier check, pinned Tailwind build, generate sw.js, stamp, deploy
+  deploy.yml                CI — unit tests, E2E tests, build, version stamp, deploy, releases
+.githooks/
+  pre-commit                Auto-formats with Prettier, runs unit tests
 ```
 
 ## Development
 
-### Local server
-
-Serve with any static HTTP server:
+### Setup
 
 ```sh
-python3 -m http.server 8080
+npm install   # installs devDependencies and wires git hooks + push.followTags
+```
+
+### Local server
+
+```sh
+npm run dev   # python3 -m http.server 8080
 ```
 
 Then open [localhost:8080](http://localhost:8080).
 
 ### Building CSS
 
-Install the Tailwind CLI via Homebrew:
-
 ```sh
-brew install tailwindcss
-```
-
-Build (or rebuild) the output CSS:
-
-```sh
-tailwindcss -i src/styles.css -o style.css --minify
+npm run build:css   # builds style.css from src/styles.css
 ```
 
 Use `--watch` during development for automatic rebuilds:
 
 ```sh
-tailwindcss -i src/styles.css -o style.css --watch
+npx tailwindcss -i src/styles.css -o style.css --watch
 ```
 
-`style.css` is the generated output and should not be edited directly. All custom CSS lives in `src/styles.css`.
+`style.css` is generated output — do not edit it directly. All custom CSS lives in `src/styles.css`.
 
-### Service worker precache
+### Service worker
 
-The deploy workflow runs `node scripts/generate-sw.mjs` after the CSS build and before copying to `dist/`, so **the live site always gets a correct `sw.js`** from the current tree—you do not need to run the script locally for production.
-
-Run it yourself when you change modules or assets under `src/` or `assets/` if you want the **committed** `sw.js` to match (and for accurate local offline/service-worker testing). Same idea as rebuilding `style.css` after editing `src/styles.css`.
+The deploy workflow regenerates `sw.js` from the current module graph before every deploy. Run it locally if you want the committed `sw.js` to reflect recent changes to `src/` or `assets/`:
 
 ```sh
-node scripts/generate-sw.mjs
+npm run build:sw
 ```
 
-It reads `sw.template.js` and writes `sw.js`. The precache list follows the `import` graph from `src/app.js` plus every file under `assets/`.
-
-### Formatting (Prettier)
-
-CI runs `prettier --check` on every deploy. Format locally without a `package.json` (pin matches CI):
+### Testing
 
 ```sh
-npx --yes prettier@3.5.3 --write .
+npm test              # unit tests (Vitest)
+npm run test:watch    # unit tests in watch mode
+npm run test:e2e      # E2E tests (Playwright) — requires a server on :8080
+npm run test:all      # unit + E2E
 ```
 
-Generated `style.css`, `sw.js`, and `dist/` are ignored via `.prettierignore`.
+The pre-commit hook runs `npm test` automatically before every commit.
+
+### Formatting
+
+Prettier runs automatically on commit. To format manually:
+
+```sh
+npm run format
+```
 
 ## Deployment
 
 Push to `main`. The GitHub Action automatically:
 
-1. **Bumps the version** if the commit message contains `[patch]`, `[minor]`, or `[major]`
-2. **Checks Prettier** — fails the job if the repo is not formatted
-3. **Builds Tailwind CSS** using the standalone Linux CLI (release pinned in the workflow file)
+1. **Runs unit tests** (Vitest)
+2. **Runs E2E tests** (Playwright, Chromium only in CI)
+3. **Builds Tailwind CSS** via `npm run build:css`
 4. **Generates `sw.js`** from `sw.template.js` and the module graph
-5. **Stamps** the version into the app footer and the commit hash into the service worker cache name
+5. **Stamps** the version from `package.json` into the app footer and the commit hash into the service worker cache name
 6. **Deploys** to the `gh-pages` branch (served by GitHub Pages)
-7. **Creates a GitHub Release** with auto-generated notes (marked pre-release while the major version is 0)
+7. **Creates a GitHub Release** with auto-generated notes if a version tag points to the deployed commit (marked pre-release while major version is 0)
 
 The workflow can also be triggered manually from the Actions tab via `workflow_dispatch`.
 
 ### Versioning
 
-Semver tags are managed automatically by the CI pipeline. Add a keyword to your commit message to trigger a bump:
+Version bumps happen locally before push, keeping `package.json` in sync with git tags. Use the `git c` alias (configured by `npm install`):
 
-- `[patch]` — bug fixes, small tweaks (v0.1.0 → v0.1.1)
-- `[minor]` — new features (v0.1.1 → v0.2.0)
-- `[major]` — breaking changes (v0.2.0 → v1.0.0)
+```sh
+git c "fix: something [patch]"    # bumps patch, e.g. 0.9.1 → 0.9.2
+git c "feat: something [minor]"   # bumps minor, e.g. 0.9.2 → 0.10.0
+git c "feat: something [major]"   # bumps major, e.g. 0.10.0 → 1.0.0
+git c "chore: something"          # no bump, deploys as-is
+```
 
-Commits without a keyword deploy normally but don't create a new version.
+The script bumps `package.json`, stages it, commits, and creates an annotated tag. `push.followTags` (set by `npm install`) pushes the tag alongside the branch automatically.
+
+- `[patch]` — bug fixes, small tweaks
+- `[minor]` — new features
+- `[major]` — breaking changes
