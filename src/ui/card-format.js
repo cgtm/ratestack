@@ -50,27 +50,45 @@ export function applyCardFormat(card, code, value) {
     symbol.classList.toggle("opacity-0", nativeActive && hasCurrencyUnit(code));
   }
 
-  fitInputFontSize(input, nativeActive);
+  fitInputFontSize(input);
 }
 
 const FONT_SIZE_MAX = 32;
 const FONT_SIZE_MIN = 14;
 
+// Hidden span used to measure rendered text width, accounting for font/letter-spacing.
+// scrollWidth on flex-child inputs is unreliable for overflow detection.
+let _measureSpan;
+function getTextWidth(text, style) {
+  if (!_measureSpan) {
+    _measureSpan = document.createElement("span");
+    _measureSpan.style.cssText =
+      "position:absolute;visibility:hidden;white-space:pre;pointer-events:none;top:-9999px;left:-9999px;";
+    document.body.appendChild(_measureSpan);
+  }
+  _measureSpan.style.fontSize = style.fontSize;
+  _measureSpan.style.fontWeight = style.fontWeight;
+  _measureSpan.style.fontFamily = style.fontFamily;
+  _measureSpan.style.letterSpacing = style.letterSpacing;
+  _measureSpan.textContent = text;
+  return _measureSpan.offsetWidth;
+}
+
 /**
  * Shrink the input font size until the text fits within its container.
- * Only active in native mode where values are genuinely long.
- * Resets to the CSS default when not in native mode.
+ * Resets to the CSS default first; only shrinks if text actually overflows.
  */
-function fitInputFontSize(input, nativeActive) {
-  if (!nativeActive) {
-    input.style.fontSize = "";
-    return;
-  }
+function fitInputFontSize(input) {
   input.style.fontSize = "";
-  if (input.scrollWidth <= input.clientWidth) return;
+  const text = input.value;
+  if (!text) return;
+  const style = getComputedStyle(input);
+  const available = input.clientWidth;
+  if (available === 0) return;
+  if (getTextWidth(text, style) <= available) return;
   input.style.fontSize = `${FONT_SIZE_MAX}px`;
   for (let size = FONT_SIZE_MAX; size > FONT_SIZE_MIN; size--) {
-    if (input.scrollWidth <= input.clientWidth) break;
-    input.style.fontSize = `${size - 1}px`;
+    input.style.fontSize = `${size}px`;
+    if (getTextWidth(text, getComputedStyle(input)) <= available) break;
   }
 }
