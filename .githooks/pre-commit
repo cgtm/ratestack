@@ -1,5 +1,20 @@
 #!/bin/sh
 set -e
+
+# Version bump: COMMIT_EDITMSG is written before pre-commit runs for `git commit -m`.
+# Files staged here ARE included in the commit (unlike prepare-commit-msg/commit-msg).
+MSG_FILE="${GIT_DIR:-.git}/COMMIT_EDITMSG"
+if [ -f "$MSG_FILE" ]; then
+  MSG=$(cat "$MSG_FILE")
+  if echo "$MSG" | grep -qE '\[(patch|minor|major)\]'; then
+    if ! git diff --cached --name-only | grep -q "^package\.json$"; then
+      BUMP=$(echo "$MSG" | grep -oE 'patch|minor|major' | head -1)
+      npm version "$BUMP" --no-git-tag-version --silent
+      git add package.json package-lock.json
+    fi
+  fi
+fi
+
 npm run format
 git add -u
 npm test
