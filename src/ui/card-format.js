@@ -2,7 +2,11 @@
  * Per-card value formatting helpers shared between cards.js and status.js.
  * Extracted to avoid a circular dependency (cards → status → cards).
  */
-import { hasNativeFormat, formatNative } from "../data/native-format.js";
+import {
+  hasNativeFormat,
+  formatNative,
+  hasCurrencyUnit,
+} from "../data/native-format.js";
 import { formatNumber } from "../data/numbers.js";
 
 /**
@@ -29,11 +33,37 @@ export function applyCardFormat(card, code, value) {
   if (!input) return;
   card.dataset.rawValue = String(value);
   const isNative = card.dataset.native === "true";
-  if (isNative && hasNativeFormat(code, value)) {
+  const nativeActive = isNative && hasNativeFormat(code, value);
+
+  if (nativeActive) {
     input.value = formatNative(value, code);
     input.readOnly = true;
   } else {
     input.value = formatNumber(value, code);
     input.readOnly = false;
+  }
+
+  // Suppress the symbol when the currency unit is appended to the value instead.
+  // Use opacity-0 not hidden to avoid a content/layout shift.
+  const symbol = card.querySelector(".card-symbol");
+  if (symbol) {
+    symbol.classList.toggle("opacity-0", nativeActive && hasCurrencyUnit(code));
+  }
+
+  fitInputFontSize(input);
+}
+
+const FONT_SIZE_MAX = 32;
+const FONT_SIZE_MIN = 14;
+
+/**
+ * Shrink the input font size until the text fits within its container.
+ * Reading scrollWidth forces a synchronous layout — intentional, we need the real measurement.
+ */
+function fitInputFontSize(input) {
+  input.style.fontSize = `${FONT_SIZE_MAX}px`;
+  for (let size = FONT_SIZE_MAX; size > FONT_SIZE_MIN; size--) {
+    if (input.scrollWidth <= input.clientWidth) break;
+    input.style.fontSize = `${size - 1}px`;
   }
 }
