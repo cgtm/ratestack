@@ -33,7 +33,9 @@ export async function mockRatesApi(page, ratesByBase = {}) {
   await page.route("**/frankfurter.app/**", (route) => {
     const url = new URL(route.request().url());
     const base = (url.searchParams.get("from") || "USD").toUpperCase();
-    const symbols = (url.searchParams.get("symbols") || "").split(",").filter(Boolean);
+    const symbols = (url.searchParams.get("symbols") || "")
+      .split(",")
+      .filter(Boolean);
     const allRates = ratesMap[base] ?? ratesMap.USD;
     const rates = {};
     for (const s of symbols) {
@@ -54,7 +56,11 @@ export async function mockRatesApi(page, ratesByBase = {}) {
     route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ result: "success", base_code: base, rates: allRates }),
+      body: JSON.stringify({
+        result: "success",
+        base_code: base,
+        rates: allRates,
+      }),
     });
   });
 }
@@ -68,7 +74,11 @@ export function seedState(state) {
 }
 
 /** Pre-seed the page with 2 selected currencies and open the app. */
-export async function openWithCurrencies(page, selected = ["USD", "EUR"], extra = {}) {
+export async function openWithCurrencies(
+  page,
+  selected = ["USD", "EUR"],
+  extra = {},
+) {
   const state = { selected, theme: "default", lang: "en", ...extra };
   await page.addInitScript(
     ({ key, value }) => localStorage.setItem(key, value),

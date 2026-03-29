@@ -45,7 +45,9 @@ test.describe("Settings", () => {
 
     await openSettings(page);
     // Click the overlay but not the panel itself
-    await page.locator("#settings-overlay").click({ position: { x: 10, y: 10 } });
+    await page
+      .locator("#settings-overlay")
+      .click({ position: { x: 10, y: 10 } });
     await expect(page.locator("#settings-panel")).not.toBeVisible();
   });
 
@@ -55,7 +57,8 @@ test.describe("Settings", () => {
 
     await openSettings(page);
     // GBP should be in the list — click it to select
-    await page.locator('[role="checkbox"][aria-checked="false"]')
+    await page
+      .locator('[role="checkbox"][aria-checked="false"]')
       .filter({ hasText: "GBP" })
       .click();
 
@@ -64,19 +67,24 @@ test.describe("Settings", () => {
     await expect(page.locator('.currency-card[data-code="GBP"]')).toBeVisible();
   });
 
-  test("deselecting a currency removes it from the converter", async ({ page }) => {
+  test("deselecting a currency removes it from the converter", async ({
+    page,
+  }) => {
     await openWithCurrencies(page, ["USD", "EUR", "GBP"]);
     await waitForConverter(page);
 
     await openSettings(page);
     // GBP should be in the selected strip — click it to deselect
-    await page.locator("#selected-list [role=\"checkbox\"][aria-checked=\"true\"]")
+    await page
+      .locator('#selected-list [role="checkbox"][aria-checked="true"]')
       .filter({ hasText: "GBP" })
       .click();
 
     await closeSettings(page);
 
-    await expect(page.locator('.currency-card[data-code="GBP"]')).not.toBeVisible();
+    await expect(
+      page.locator('.currency-card[data-code="GBP"]'),
+    ).not.toBeVisible();
   });
 
   test("cannot select more than 5 currencies", async ({ page }) => {
@@ -86,7 +94,9 @@ test.describe("Settings", () => {
     await openSettings(page);
 
     // All unselected items should be disabled (opacity class)
-    const unselected = page.locator('[role="checkbox"][aria-checked="false"]').first();
+    const unselected = page
+      .locator('[role="checkbox"][aria-checked="false"]')
+      .first();
     await expect(unselected).toHaveClass(/cursor-not-allowed/);
   });
 
@@ -100,13 +110,16 @@ test.describe("Settings", () => {
     await page.locator("#theme-picker button[aria-haspopup='listbox']").click();
 
     // Select Arctic Dark
-    await page.locator("#theme-dropdown-list [role='option']")
+    await page
+      .locator("#theme-dropdown-list [role='option']")
       .filter({ hasText: "Arctic Dark" })
       .click();
 
     // CSS var should now reflect arctic theme's accent color
     const accent = await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue("--color-accent").trim()
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--color-accent")
+        .trim(),
     );
     expect(accent).toBe("#00d4aa");
   });
@@ -118,10 +131,13 @@ test.describe("Settings", () => {
     await openSettings(page);
 
     // Open language dropdown
-    await page.locator("#language-picker button[aria-haspopup='listbox']").click();
+    await page
+      .locator("#language-picker button[aria-haspopup='listbox']")
+      .click();
 
     // Select Korean
-    await page.locator("#lang-dropdown-list [role='option']")
+    await page
+      .locator("#lang-dropdown-list [role='option']")
       .filter({ hasText: "한국어" })
       .click();
 
@@ -129,7 +145,9 @@ test.describe("Settings", () => {
     await expect(page.locator("#settings-title")).toHaveText("설정");
   });
 
-  test("currency count display updates as currencies selected", async ({ page }) => {
+  test("currency count display updates as currencies selected", async ({
+    page,
+  }) => {
     await openWithCurrencies(page, ["USD", "EUR"]);
     await waitForConverter(page);
 
@@ -138,7 +156,8 @@ test.describe("Settings", () => {
     await expect(page.locator("#settings-count")).toHaveText("2 / 5");
 
     // Select one more
-    await page.locator('[role="checkbox"][aria-checked="false"]')
+    await page
+      .locator('[role="checkbox"][aria-checked="false"]')
       .filter({ hasText: "GBP" })
       .click();
 

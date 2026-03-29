@@ -108,7 +108,10 @@ function applyAfterClose(snapshot) {
       : store.selected[0];
     if (selectedChanged) {
       store.baseAmount = "";
-      refreshRates().then(() => { renderConverter(); updateDisclaimerUI(); });
+      refreshRates().then(() => {
+        renderConverter();
+        updateDisclaimerUI();
+      });
     } else if (langChanged) {
       renderConverter();
     }

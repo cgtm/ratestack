@@ -32,7 +32,6 @@ body {
   background-clip: text;
 }
 
-
 .overlay-transition {
   transition:
     opacity 0.25s,

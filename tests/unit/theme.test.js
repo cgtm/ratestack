@@ -41,20 +41,36 @@ describe("resolveThemeName", () => {
 
 describe("THEMES", () => {
   const REQUIRED_KEYS = [
-    "bg", "surface", "brd", "main", "dim",
-    "accent", "accent-secondary", "accent-glow", "accent-bg",
+    "bg",
+    "surface",
+    "brd",
+    "main",
+    "dim",
+    "accent",
+    "accent-secondary",
+    "accent-glow",
+    "accent-bg",
   ];
 
   it("every theme has all required color keys", () => {
     for (const [name, theme] of Object.entries(THEMES)) {
       for (const key of REQUIRED_KEYS) {
-        expect(theme.colors[key], `${name} missing colors.${key}`).toBeDefined();
+        expect(
+          theme.colors[key],
+          `${name} missing colors.${key}`,
+        ).toBeDefined();
       }
     }
   });
 
   it("paired dark/light themes all exist", () => {
-    const pairs = ["default/light", "sunset/sunset-light", "arctic/arctic-light", "forest/forest-light", "ember/ember-light"];
+    const pairs = [
+      "default/light",
+      "sunset/sunset-light",
+      "arctic/arctic-light",
+      "forest/forest-light",
+      "ember/ember-light",
+    ];
     for (const pair of pairs) {
       const [dark, light] = pair.split("/");
       expect(THEMES[dark], `missing dark theme: ${dark}`).toBeDefined();
@@ -73,7 +89,9 @@ describe("applyTheme", () => {
     // happy-dom provides document; spy on setProperty and meta
     rootStyle = {};
     vi.spyOn(document.documentElement.style, "setProperty").mockImplementation(
-      (key, value) => { rootStyle[key] = value; },
+      (key, value) => {
+        rootStyle[key] = value;
+      },
     );
 
     const meta = document.createElement("meta");

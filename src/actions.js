@@ -7,7 +7,11 @@
  * themselves, avoiding circular dependencies.
  */
 import { store, saveState } from "./data/store.js";
-import { fetchRatesFromApi, hasCompleteRates, usesFrankfurter } from "./data/rates.js";
+import {
+  fetchRatesFromApi,
+  hasCompleteRates,
+  usesFrankfurter,
+} from "./data/rates.js";
 import { hapticSuccess } from "./haptics.js";
 
 const STALE_MS = 60 * 60 * 1000;
@@ -25,7 +29,9 @@ export async function refreshRates() {
     store.rates = { [base]: rates };
     store.ratesLastSuccessAt = Date.now();
     store.ratesFetchError = false;
-    store.ratesSource = usesFrankfurter(base, store.selected) ? "frankfurter" : "er-api";
+    store.ratesSource = usesFrankfurter(base, store.selected)
+      ? "frankfurter"
+      : "er-api";
     hapticSuccess();
     return { ok: true };
   } catch (err) {

@@ -9,7 +9,12 @@ vi.mock("../../src/currencies.js", () => ({
   },
 }));
 
-import { store, loadState, saveState, hasMinimumCurrencies } from "../../src/data/store.js";
+import {
+  store,
+  loadState,
+  saveState,
+  hasMinimumCurrencies,
+} from "../../src/data/store.js";
 
 function resetStore() {
   store.selected = [];
@@ -109,7 +114,11 @@ describe("loadState with corrupted storage", () => {
   it("filters out unknown currency codes", () => {
     localStorage.setItem(
       "ratestack",
-      JSON.stringify({ selected: ["USD", "FAKE", "EUR"], theme: "default", lang: "en" }),
+      JSON.stringify({
+        selected: ["USD", "FAKE", "EUR"],
+        theme: "default",
+        lang: "en",
+      }),
     );
     loadState();
     expect(store.selected).toEqual(["USD", "EUR"]);

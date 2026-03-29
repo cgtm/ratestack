@@ -4,7 +4,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("../../src/i18n.js", () => ({
   numberLocale: vi.fn(() => "en-US"),
   t: (key, params) => {
-    if (key === "rate.display") return `1 ${params.from} = ${params.value} ${params.to}`;
+    if (key === "rate.display")
+      return `1 ${params.from} = ${params.value} ${params.to}`;
     return key;
   },
 }));
@@ -193,7 +194,12 @@ describe("computeConvertedAmounts", () => {
   const rates = { USD: { EUR: 0.92, GBP: 0.79 } };
 
   it("converts correctly", () => {
-    const result = computeConvertedAmounts("100", "USD", ["USD", "EUR", "GBP"], rates);
+    const result = computeConvertedAmounts(
+      "100",
+      "USD",
+      ["USD", "EUR", "GBP"],
+      rates,
+    );
     expect(result.EUR).toBeCloseTo(92);
     expect(result.GBP).toBeCloseTo(79);
   });
@@ -204,11 +210,15 @@ describe("computeConvertedAmounts", () => {
   });
 
   it("returns null for empty base amount", () => {
-    expect(computeConvertedAmounts("", "USD", ["USD", "EUR"], rates)).toBeNull();
+    expect(
+      computeConvertedAmounts("", "USD", ["USD", "EUR"], rates),
+    ).toBeNull();
   });
 
   it("returns null for non-numeric base amount", () => {
-    expect(computeConvertedAmounts("abc", "USD", ["USD", "EUR"], rates)).toBeNull();
+    expect(
+      computeConvertedAmounts("abc", "USD", ["USD", "EUR"], rates),
+    ).toBeNull();
   });
 
   it("returns empty object when base rates are missing", () => {
@@ -217,7 +227,12 @@ describe("computeConvertedAmounts", () => {
   });
 
   it("omits codes missing from rates", () => {
-    const result = computeConvertedAmounts("100", "USD", ["USD", "EUR", "JPY"], rates);
+    const result = computeConvertedAmounts(
+      "100",
+      "USD",
+      ["USD", "EUR", "JPY"],
+      rates,
+    );
     expect(result.EUR).toBeCloseTo(92);
     expect(result.JPY).toBeUndefined();
   });

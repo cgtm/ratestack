@@ -12,16 +12,21 @@ test.describe("Converter", () => {
     await mockRatesApi(page);
   });
 
-  test("shows loading skeleton then renders currency cards", async ({ page }) => {
+  test("shows loading skeleton then renders currency cards", async ({
+    page,
+  }) => {
     // Delay the API response so the loading skeleton is observable
-    const delay = (route) => new Promise((r) => setTimeout(r, 600)).then(() => route.continue());
+    const delay = (route) =>
+      new Promise((r) => setTimeout(r, 600)).then(() => route.continue());
     await page.route("**/frankfurter.app/**", delay);
     await page.route("**/open.er-api.com/**", delay);
 
     await openWithCurrencies(page, ["USD", "EUR"]);
 
     // Loading skeleton should appear while waiting for rates
-    await expect(page.locator('[aria-busy="true"]')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('[aria-busy="true"]')).toBeVisible({
+      timeout: 3000,
+    });
 
     // Cards appear after rates load
     await waitForConverter(page);
@@ -45,16 +50,22 @@ test.describe("Converter", () => {
     await expect(cardInput(page, "EUR")).toHaveValue(/92/);
   });
 
-  test("rate label shows exchange rate below non-base card", async ({ page }) => {
+  test("rate label shows exchange rate below non-base card", async ({
+    page,
+  }) => {
     await openWithCurrencies(page, ["USD", "EUR"]);
     await waitForConverter(page);
 
-    const rateLabel = page.locator('.currency-card[data-code="EUR"] .currency-rate');
+    const rateLabel = page.locator(
+      '.currency-card[data-code="EUR"] .currency-rate',
+    );
     await expect(rateLabel).toContainText("1 USD");
     await expect(rateLabel).toContainText("EUR");
   });
 
-  test("active card gets accent border, others get default border", async ({ page }) => {
+  test("active card gets accent border, others get default border", async ({
+    page,
+  }) => {
     await openWithCurrencies(page, ["USD", "EUR", "GBP"]);
     await waitForConverter(page);
 
@@ -68,13 +79,17 @@ test.describe("Converter", () => {
     await expect(usdCard).not.toHaveClass(/border-accent/);
   });
 
-  test("removing a card via close button keeps converter visible", async ({ page }) => {
+  test("removing a card via close button keeps converter visible", async ({
+    page,
+  }) => {
     await openWithCurrencies(page, ["USD", "EUR", "GBP"]);
     await waitForConverter(page);
 
     await cardClose(page, "GBP").click();
 
-    await expect(page.locator('.currency-card[data-code="GBP"]')).not.toBeVisible();
+    await expect(
+      page.locator('.currency-card[data-code="GBP"]'),
+    ).not.toBeVisible();
     await expect(page.locator('.currency-card[data-code="USD"]')).toBeVisible();
   });
 
@@ -91,8 +106,12 @@ test.describe("Converter", () => {
     await openWithCurrencies(page, ["USD", "EUR"]);
     await waitForConverter(page);
 
-    await expect(page.locator('.currency-card[data-code="USD"] .card-copy')).toBeVisible();
-    await expect(page.locator('.currency-card[data-code="EUR"] .card-copy')).toBeVisible();
+    await expect(
+      page.locator('.currency-card[data-code="USD"] .card-copy'),
+    ).toBeVisible();
+    await expect(
+      page.locator('.currency-card[data-code="EUR"] .card-copy'),
+    ).toBeVisible();
   });
 
   test("refresh button triggers spinner", async ({ page }) => {

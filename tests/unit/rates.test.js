@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchRatesFromApi, hasCompleteRates, usesFrankfurter } from "../../src/data/rates.js";
+import {
+  fetchRatesFromApi,
+  hasCompleteRates,
+  usesFrankfurter,
+} from "../../src/data/rates.js";
 
 // ─── hasCompleteRates ─────────────────────────────────────────────────────────
 
@@ -120,9 +124,7 @@ describe("fetchRatesFromApi", () => {
   it("calls er-api when a selected currency is not in Frankfurter set", async () => {
     mockErApiSuccess({ EUR: 0.92, NGN: 1620 });
     await fetchRatesFromApi("USD", ["USD", "EUR", "NGN"]);
-    expect(fetch).toHaveBeenCalledWith(
-      "https://open.er-api.com/v6/latest/USD",
-    );
+    expect(fetch).toHaveBeenCalledWith("https://open.er-api.com/v6/latest/USD");
   });
 
   // ── response parsing ──────────────────────────────────────────────────────
@@ -151,12 +153,16 @@ describe("fetchRatesFromApi", () => {
 
   it("throws on HTTP error from Frankfurter", async () => {
     mockFetchHttpError(429);
-    await expect(fetchRatesFromApi("USD", ["USD", "EUR"])).rejects.toThrow("HTTP 429");
+    await expect(fetchRatesFromApi("USD", ["USD", "EUR"])).rejects.toThrow(
+      "HTTP 429",
+    );
   });
 
   it("throws on HTTP error from er-api", async () => {
     mockFetchHttpError(500);
-    await expect(fetchRatesFromApi("USD", ["USD", "EUR", "NGN"])).rejects.toThrow("HTTP 500");
+    await expect(
+      fetchRatesFromApi("USD", ["USD", "EUR", "NGN"]),
+    ).rejects.toThrow("HTTP 500");
   });
 
   it("throws on er-api result !== success", async () => {
@@ -164,11 +170,15 @@ describe("fetchRatesFromApi", () => {
       ok: true,
       json: async () => ({ result: "error", "error-type": "invalid-key" }),
     });
-    await expect(fetchRatesFromApi("USD", ["USD", "EUR", "NGN"])).rejects.toThrow("invalid-key");
+    await expect(
+      fetchRatesFromApi("USD", ["USD", "EUR", "NGN"]),
+    ).rejects.toThrow("invalid-key");
   });
 
   it("throws on network failure", async () => {
     fetch.mockRejectedValue(new TypeError("Failed to fetch"));
-    await expect(fetchRatesFromApi("USD", ["USD", "EUR"])).rejects.toThrow("Failed to fetch");
+    await expect(fetchRatesFromApi("USD", ["USD", "EUR"])).rejects.toThrow(
+      "Failed to fetch",
+    );
   });
 });
