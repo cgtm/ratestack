@@ -17,6 +17,11 @@ export default defineConfig({
       ],
       reporter: ["text", "html"],
       reportsDirectory: "coverage",
+      thresholds: {
+        statements: 95,
+        branches: 85,
+        functions: 100,
+      },
     },
   },
 });

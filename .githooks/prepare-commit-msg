@@ -1,0 +1,11 @@
+#!/bin/sh
+MSG=$(cat "$1")
+if ! echo "$MSG" | grep -qE '\[(patch|minor|major)\]'; then
+  exit 0
+fi
+if git diff --cached --name-only | grep -q "^package\.json$"; then
+  exit 0
+fi
+BUMP=$(echo "$MSG" | grep -oE '\[(patch|minor|major)\]' | head -1 | tr -d '[]')
+npm version "$BUMP" --no-git-tag-version --silent
+git add package.json package-lock.json

@@ -37,7 +37,7 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 - Vanilla JavaScript (ES modules, no framework, no bundler)
 - [Tailwind CSS v4](https://tailwindcss.com) (CLI via `@tailwindcss/cli` devDependency)
 - [Prettier](https://prettier.io) — auto-applied on commit via pre-commit hook
-- [Vitest](https://vitest.dev) — unit tests (130 tests, ~400ms)
+- [Vitest](https://vitest.dev) — unit tests (157 tests, ~450ms) with V8 coverage and threshold gates
 - [Playwright](https://playwright.dev) — E2E tests (60 tests across mobile and desktop viewports)
 - Service worker for offline caching
 - GitHub Pages for hosting
@@ -155,13 +155,14 @@ npm run build:sw
 ### Testing
 
 ```sh
-npm test              # unit tests (Vitest)
+npm test              # unit tests (Vitest, no coverage)
+npm run test:coverage # unit tests with V8 coverage report + threshold gates
 npm run test:watch    # unit tests in watch mode
 npm run test:e2e      # E2E tests (Playwright) — requires a server on :8080
 npm run test:all      # unit + E2E
 ```
 
-The pre-commit hook runs `npm test` automatically before every commit.
+The pre-commit hook runs `npm test` (fast, no coverage) before every commit. The pre-push hook runs `npm run test:coverage` with threshold gates before every push. CI also runs coverage.
 
 ### Formatting
 
@@ -187,7 +188,7 @@ The workflow can also be triggered manually from the Actions tab via `workflow_d
 
 ### Versioning
 
-Version bumps happen automatically on commit via git hooks. Include a keyword in any commit message:
+Version bumps happen automatically via the `prepare-commit-msg` hook — just include a keyword in any commit message:
 
 ```sh
 git commit -m "fix: something [patch]"    # bumps patch, e.g. 0.9.1 → 0.9.2
@@ -196,7 +197,7 @@ git commit -m "feat: something [major]"   # bumps major, e.g. 0.10.0 → 1.0.0
 git commit -m "chore: something"          # no bump, deploys as-is
 ```
 
-The `prepare-commit-msg` hook bumps `package.json` and stages it automatically. The `post-commit` hook creates an annotated tag. `push.followTags` (set by `npm install`) pushes the tag alongside the branch automatically.
+The hook bumps `package.json` and stages it before the commit is created. The `post-commit` hook creates an annotated tag. `push.followTags` (set by `npm install`) pushes the tag alongside the branch automatically.
 
 - `[patch]` — bug fixes, small tweaks
 - `[minor]` — new features
