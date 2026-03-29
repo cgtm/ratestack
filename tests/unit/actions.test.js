@@ -65,8 +65,11 @@ describe("refreshRates", () => {
 
   it("sets ratesFetchError on failure", async () => {
     fetchRatesFromApi.mockRejectedValue(new Error("Network error"));
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const result = await refreshRates();
+
+    consoleSpy.mockRestore();
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe(true);
