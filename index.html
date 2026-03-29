@@ -109,10 +109,15 @@
         class="text-[10px] text-dim/80 leading-snug pt-2 px-0.5 hidden"
       ></p>
 
+      <p
+        id="rate-attribution"
+        class="text-[10px] text-dim/60 leading-snug px-0.5 hidden"
+      ></p>
+
       <footer
         class="flex items-center justify-center gap-2 pt-8 pb-2 text-[11px] text-dim/70"
       >
-        <span id="app-version">v0.8.5</span>
+        <span id="app-version">v0.9.0</span>
         <span>·</span>
         <a
           href="https://github.com/cgtm/ratestack/issues"
@@ -125,14 +130,14 @@
 
       <div
         id="settings-overlay"
-        class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-lg flex items-end justify-center overlay-transition opacity-0 invisible pointer-events-none"
+        class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-lg flex flex-col items-center justify-end overlay-transition opacity-0 invisible pointer-events-none"
       >
         <div
           id="settings-panel"
           role="dialog"
           aria-modal="true"
           aria-labelledby="settings-title"
-          class="bg-surface rounded-t-[20px] w-full max-w-[480px] max-h-[94dvh] flex flex-col px-5 pt-6 panel-transition translate-y-full"
+          class="bg-surface rounded-t-[20px] w-full max-w-[480px] max-h-[85dvh] flex flex-col px-5 pt-6 panel-transition translate-y-full"
         >
           <div class="flex items-center justify-between mb-1 shrink-0 relative">
             <h2 id="settings-title" class="text-xl font-bold">Settings</h2>
@@ -210,8 +215,18 @@
           <div class="h-[2px] bg-brd shrink-0 mb-3" id="selected-divider"></div>
           <div
             id="currency-list"
-            class="flex flex-col gap-1.5 overflow-y-auto overscroll-contain pb-6"
+            class="flex flex-col gap-1.5 overflow-y-auto overscroll-contain pb-4"
           ></div>
+        </div>
+        <div
+          class="w-full max-w-[480px] bg-surface px-5 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] panel-transition translate-y-full"
+        >
+          <button
+            id="settings-done"
+            class="w-full py-4 rounded-2xl bg-accent text-accent-fg font-semibold text-[16px] cursor-pointer border-none"
+          >
+            Done
+          </button>
         </div>
       </div>
     </div>

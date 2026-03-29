@@ -1,7 +1,12 @@
 /**
- * Theme palettes. Display names use keys `theme.<id>` in locale files; `label` here is unused in UI.
- * `applyTheme` writes CSS variables consumed by Tailwind theme tokens and custom gradients.
+ * Theme palettes and application.
+ *
+ * Display names use `theme.<id>` keys in locale files. `applyTheme` writes CSS
+ * custom properties consumed by Tailwind theme tokens and custom gradients.
+ *
+ * The "auto" theme resolves to default/light based on `prefers-color-scheme`.
  */
+
 export const THEMES = {
   default: {
     label: "Dark",
@@ -12,6 +17,7 @@ export const THEMES = {
       main: "#e8e8f0",
       dim: "#8888aa",
       accent: "#6c63ff",
+      "accent-fg": "#ffffff",
       "accent-secondary": "#a78bfa",
       "accent-glow": "rgba(108, 99, 255, 0.25)",
       "accent-bg": "rgba(108, 99, 255, 0.08)",
@@ -26,6 +32,7 @@ export const THEMES = {
       main: "#1c1c1e",
       dim: "#8e8e93",
       accent: "#5856d6",
+      "accent-fg": "#ffffff",
       "accent-secondary": "#af52de",
       "accent-glow": "rgba(88, 86, 214, 0.2)",
       "accent-bg": "rgba(88, 86, 214, 0.06)",
@@ -40,6 +47,7 @@ export const THEMES = {
       main: "#f0e8ec",
       dim: "#aa7890",
       accent: "#ff3f8f",
+      "accent-fg": "#ffffff",
       "accent-secondary": "#ff8a2b",
       "accent-glow": "rgba(255, 63, 143, 0.25)",
       "accent-bg": "rgba(255, 63, 143, 0.08)",
@@ -54,6 +62,7 @@ export const THEMES = {
       main: "#2d1a24",
       dim: "#b07088",
       accent: "#e83580",
+      "accent-fg": "#ffffff",
       "accent-secondary": "#f07a1a",
       "accent-glow": "rgba(232, 53, 128, 0.2)",
       "accent-bg": "rgba(232, 53, 128, 0.06)",
@@ -68,6 +77,7 @@ export const THEMES = {
       main: "#e0f0f8",
       dim: "#6a9fb5",
       accent: "#00d4aa",
+      "accent-fg": "#0a1218",
       "accent-secondary": "#38bdf8",
       "accent-glow": "rgba(0, 212, 170, 0.25)",
       "accent-bg": "rgba(0, 212, 170, 0.08)",
@@ -82,6 +92,7 @@ export const THEMES = {
       main: "#0c2630",
       dim: "#5a8a9a",
       accent: "#00a884",
+      "accent-fg": "#0c2630",
       "accent-secondary": "#0891b2",
       "accent-glow": "rgba(0, 168, 132, 0.2)",
       "accent-bg": "rgba(0, 168, 132, 0.06)",
@@ -96,6 +107,7 @@ export const THEMES = {
       main: "#e8f0ec",
       dim: "#6b8f7a",
       accent: "#22c55e",
+      "accent-fg": "#0c1410",
       "accent-secondary": "#84cc16",
       "accent-glow": "rgba(34, 197, 94, 0.25)",
       "accent-bg": "rgba(34, 197, 94, 0.08)",
@@ -110,6 +122,7 @@ export const THEMES = {
       main: "#142818",
       dim: "#5a7a68",
       accent: "#16a34a",
+      "accent-fg": "#142818",
       "accent-secondary": "#65a30d",
       "accent-glow": "rgba(22, 163, 74, 0.2)",
       "accent-bg": "rgba(22, 163, 74, 0.06)",
@@ -124,6 +137,7 @@ export const THEMES = {
       main: "#f5ebe8",
       dim: "#a89088",
       accent: "#f97316",
+      "accent-fg": "#140f0d",
       "accent-secondary": "#ef4444",
       "accent-glow": "rgba(249, 115, 22, 0.25)",
       "accent-bg": "rgba(249, 115, 22, 0.08)",
@@ -138,6 +152,7 @@ export const THEMES = {
       main: "#2c1810",
       dim: "#8b6f63",
       accent: "#ea580c",
+      "accent-fg": "#2c1810",
       "accent-secondary": "#dc2626",
       "accent-glow": "rgba(234, 88, 12, 0.2)",
       "accent-bg": "rgba(234, 88, 12, 0.06)",
@@ -145,11 +160,20 @@ export const THEMES = {
   },
 };
 
+/** Resolve "auto" to a concrete theme name based on OS preference. */
+export function resolveThemeName(name) {
+  if (name !== "auto") return name;
+  const prefersDark =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return prefersDark ? "default" : "light";
+}
+
 export function applyTheme(name) {
-  const theme = THEMES[name] || THEMES.default;
+  const resolved = resolveThemeName(name);
+  const theme = THEMES[resolved] || THEMES.default;
   const root = document.documentElement;
 
-  // Maps JS keys like accent-secondary → --color-accent-secondary for CSS and Tailwind v4 @theme.
   Object.entries(theme.colors).forEach(([key, value]) => {
     root.style.setProperty(`--color-${key}`, value);
   });

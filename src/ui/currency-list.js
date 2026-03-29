@@ -1,13 +1,13 @@
 /**
- * Settings currency list: selected strip + regional lists.
+ * Settings currency selection: selected strip + regional grouped list.
  */
 import { CURRENCIES, CURRENCY_REGIONS } from "../currencies.js";
-import { store, saveState } from "../state.js";
+import { store, saveState } from "../data/store.js";
 import { currencyName, regionName, t } from "../i18n.js";
-import { showSaveConfirmation } from "./overlay.js";
+import { showSaveConfirmation } from "./settings.js";
 import { SETTINGS_CURRENCY_CHECK_SVG_TEMPLATE } from "../../assets/ui/icons.js";
 
-function createCurrencyOptionElement(code, rerenderSettings) {
+function createCurrencyOption(code, rerenderSettings) {
   const info = CURRENCIES[code];
   if (!info) return null;
   const isSelected = store.selected.includes(code);
@@ -27,38 +27,36 @@ function createCurrencyOptionElement(code, rerenderSettings) {
   ].join(" ");
 
   opt.innerHTML = `
-      <span class="text-2xl">${info.flag}</span>
-      <div class="flex-1">
-        <div class="text-[15px] font-semibold">${code}</div>
-        <div class="text-xs text-dim">${currencyName(code)}</div>
-      </div>
-      <div class="w-[22px] h-[22px] rounded-md border-2 ${isSelected ? "bg-accent border-accent" : "border-brd"} flex items-center justify-center transition-[background,border-color] duration-200 shrink-0">
-        ${SETTINGS_CURRENCY_CHECK_SVG_TEMPLATE.replace(
-          "__CLASS__",
-          `${isSelected ? "opacity-100" : "opacity-0"} transition-opacity duration-150`,
-        )}
-      </div>
-    `;
+    <span class="text-2xl">${info.flag}</span>
+    <div class="flex-1">
+      <div class="text-[15px] font-semibold">${code}</div>
+      <div class="text-xs text-dim">${currencyName(code)}</div>
+    </div>
+    <div class="w-[22px] h-[22px] rounded-md border-2 ${isSelected ? "bg-accent border-accent" : "border-brd"} flex items-center justify-center transition-[background,border-color] duration-200 shrink-0">
+      ${SETTINGS_CURRENCY_CHECK_SVG_TEMPLATE.replace(
+        "__CLASS__",
+        `${isSelected ? "opacity-100" : "opacity-0"} transition-opacity duration-150`,
+      )}
+    </div>
+  `;
 
-  function toggleSelection() {
+  function toggle() {
     if (!isSelected && atMax) return;
-
     if (isSelected) {
       store.selected = store.selected.filter((c) => c !== code);
     } else {
       store.selected.push(code);
     }
-
     saveState();
     rerenderSettings();
     showSaveConfirmation();
   }
 
-  opt.addEventListener("click", toggleSelection);
+  opt.addEventListener("click", toggle);
   opt.addEventListener("keydown", (e) => {
     if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
-      toggleSelection();
+      toggle();
     }
   });
 
@@ -78,10 +76,7 @@ export function syncCurrencyHintAndCount() {
   if (countEl) countEl.textContent = `${store.selected.length} / 5`;
 }
 
-/**
- * @param {() => void} rerenderSettings
- */
-export function renderSelectedCurrencyStrip(rerenderSettings) {
+export function renderSelectedStrip(rerenderSettings) {
   const selectedList = document.getElementById("selected-list");
   const divider = document.getElementById("selected-divider");
   selectedList.innerHTML = "";
@@ -89,7 +84,7 @@ export function renderSelectedCurrencyStrip(rerenderSettings) {
   if (store.selected.length > 0) {
     divider.classList.remove("hidden");
     store.selected.forEach((code) => {
-      const opt = createCurrencyOptionElement(code, rerenderSettings);
+      const opt = createCurrencyOption(code, rerenderSettings);
       if (opt) selectedList.appendChild(opt);
     });
   } else {
@@ -97,11 +92,7 @@ export function renderSelectedCurrencyStrip(rerenderSettings) {
   }
 }
 
-/**
- * @param {HTMLElement} listEl
- * @param {() => void} rerenderSettings
- */
-export function renderRegionalCurrencyList(listEl, rerenderSettings) {
+export function renderRegionalList(listEl, rerenderSettings) {
   CURRENCY_REGIONS.forEach(({ region, codes }) => {
     const unselected = codes.filter((c) => !store.selected.includes(c));
     if (unselected.length === 0) return;
@@ -113,7 +104,7 @@ export function renderRegionalCurrencyList(listEl, rerenderSettings) {
     listEl.appendChild(header);
 
     unselected.forEach((code) => {
-      const opt = createCurrencyOptionElement(code, rerenderSettings);
+      const opt = createCurrencyOption(code, rerenderSettings);
       if (opt) listEl.appendChild(opt);
     });
   });

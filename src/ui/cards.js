@@ -1,17 +1,24 @@
 /**
- * Currency card DOM, inputs, copy/close, drag, and swipe wiring.
+ * Currency card DOM construction and input event wiring.
+ *
+ * Cards are built with innerHTML for the static skeleton (all interpolated values
+ * come from our own trusted currency catalog and i18n strings, never user input).
+ * Dynamic text is set via textContent where practical.
  */
 import { CURRENCIES } from "../currencies.js";
+import { store } from "../data/store.js";
 import {
-  store,
   getRateDisplay,
-  parseLocaleAmountString,
+  parseLocaleAmount,
   normalizeTypingAmount,
-} from "../state.js";
-import { recalculate, updateRateLabels, fetchRatesIfNeeded } from "../api.js";
+} from "../data/numbers.js";
+import { refreshRatesIfNeeded } from "../actions.js";
+import {
+  recalculateCardValues,
+  updateRateLabels,
+  updateRateStatusUI,
+} from "./status.js";
 import { hapticSuccess } from "../haptics.js";
-import { initDragAndDrop } from "../drag.js";
-import { initSwipeToDismiss } from "../swipe.js";
 import { currencyName, t } from "../i18n.js";
 import { CLOSE_SVG, COPY_SVG, GRIP_SVG } from "../../assets/ui/icons.js";
 
@@ -22,8 +29,16 @@ const CARD_INACTIVE = "border-brd";
 const ACTIVE_CLASSES = CARD_ACTIVE.split(" ");
 const INACTIVE_CLASSES = CARD_INACTIVE.split(" ");
 
-function cardClassName(isActive) {
-  return `${CARD_BASE} ${isActive ? CARD_ACTIVE : CARD_INACTIVE}`;
+function clearActiveStyling() {
+  document.querySelectorAll(".currency-card").forEach((c) => {
+    c.classList.remove(...ACTIVE_CLASSES);
+    c.classList.add(...INACTIVE_CLASSES);
+  });
+}
+
+function applyActiveStyling(card) {
+  card.classList.remove(...INACTIVE_CLASSES);
+  card.classList.add(...ACTIVE_CLASSES);
 }
 
 function buildCardMarkup({ info, code, isActive, rateText, inputLabel }) {
@@ -67,45 +82,26 @@ function buildCardMarkup({ info, code, isActive, rateText, inputLabel }) {
     `;
 }
 
-function clearActiveStylingFromAllCards() {
-  document.querySelectorAll(".currency-card").forEach((c) => {
-    c.classList.remove(...ACTIVE_CLASSES);
-    c.classList.add(...INACTIVE_CLASSES);
-  });
-}
-
-function applyActiveStyling(card) {
-  card.classList.remove(...INACTIVE_CLASSES);
-  card.classList.add(...ACTIVE_CLASSES);
-}
-
-function syncBaseFromInputAndRefetch(input, code) {
-  store.baseCurrency = code;
-  store.baseAmount = parseLocaleAmountString(input.value);
-  input.value = store.baseAmount;
-  fetchRatesIfNeeded().then(() => {
-    recalculate();
-    updateRateLabels();
-  });
-}
-
 function attachInputListeners(card, code, input) {
   input.addEventListener("focus", () => {
-    clearActiveStylingFromAllCards();
+    clearActiveStyling();
     applyActiveStyling(card);
-    syncBaseFromInputAndRefetch(input, code);
+    store.baseCurrency = code;
+    store.baseAmount = parseLocaleAmount(input.value);
+    input.value = store.baseAmount;
+    refreshRatesIfNeeded().then(() => {
+      recalculateCardValues();
+      updateRateLabels();
+      updateRateStatusUI();
+    });
   });
 
   input.addEventListener("input", () => {
     const sanitized = normalizeTypingAmount(input.value);
     input.value = sanitized;
     store.baseAmount = sanitized;
-    recalculate();
+    recalculateCardValues();
   });
-}
-
-function copyPayloadText(symbol, rawTrimmed) {
-  return rawTrimmed ? `${symbol}${rawTrimmed}` : symbol;
 }
 
 function runCopyTapAnimation(copyBtn) {
@@ -119,7 +115,7 @@ function runCopyTapAnimation(copyBtn) {
   copyBtn.addEventListener("animationend", endTap);
 }
 
-function showCopySuccessOnButton(copyBtn, code) {
+function showCopySuccess(copyBtn, code) {
   hapticSuccess();
   copyBtn.classList.add("card-copy-done");
   clearTimeout(copyBtn._copyDoneTimer);
@@ -138,7 +134,7 @@ function attachCopyListener(card, code, info) {
     ev.stopPropagation();
     const inp = card.querySelector(".currency-input");
     const raw = (inp?.value || "").trim();
-    const text = copyPayloadText(info.symbol, raw);
+    const text = raw ? `${info.symbol}${raw}` : info.symbol;
     const copyBtn = ev.currentTarget;
 
     runCopyTapAnimation(copyBtn);
@@ -146,37 +142,27 @@ function attachCopyListener(card, code, info) {
     if (navigator.clipboard?.writeText) {
       navigator.clipboard
         .writeText(text)
-        .then(() => showCopySuccessOnButton(copyBtn, code))
+        .then(() => showCopySuccess(copyBtn, code))
         .catch(() => {});
     }
   });
 }
 
-function attachCloseListener(card, code, removeCurrency) {
-  card
-    .querySelector(".card-close")
-    .addEventListener("click", () => removeCurrency(code));
-}
-
-function attachCardListeners(card, code, info, removeCurrency) {
-  const input = card.querySelector(".currency-input");
-  attachInputListeners(card, code, input);
-  attachCloseListener(card, code, removeCurrency);
-  attachCopyListener(card, code, info);
-}
-
 /**
+ * Creates a fully-wired currency card element.
  * @param {string} code
- * @param {(code: string) => void} removeCurrency
+ * @param {(code: string) => void} onRemove
  */
-export function createCurrencyCard(code, removeCurrency) {
+export function createCurrencyCard(code, onRemove) {
   const info = CURRENCIES[code];
   const isActive = code === store.baseCurrency;
-  const rateText = isActive ? "" : getRateDisplay(store.baseCurrency, code);
+  const rateText = isActive
+    ? ""
+    : getRateDisplay(store.baseCurrency, code, store.rates);
   const inputLabel = `${currencyName(code)} — ${t("aria.amount")}`;
 
   const card = document.createElement("div");
-  card.className = cardClassName(isActive);
+  card.className = `${CARD_BASE} ${isActive ? CARD_ACTIVE : CARD_INACTIVE}`;
   card.dataset.code = code;
   card.tabIndex = 0;
   card.innerHTML = buildCardMarkup({
@@ -187,15 +173,12 @@ export function createCurrencyCard(code, removeCurrency) {
     inputLabel,
   });
 
-  attachCardListeners(card, code, info, removeCurrency);
-  return card;
-}
+  const input = card.querySelector(".currency-input");
+  attachInputListeners(card, code, input);
+  attachCopyListener(card, code, info);
+  card
+    .querySelector(".card-close")
+    .addEventListener("click", () => onRemove(code));
 
-/**
- * @param {HTMLElement} container
- * @param {(code: string) => void} removeCurrency
- */
-export function wireCardGestures(container, removeCurrency) {
-  initDragAndDrop(container);
-  initSwipeToDismiss(container, removeCurrency);
+  return card;
 }
