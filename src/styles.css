@@ -42,8 +42,8 @@ body {
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-#settings-overlay {
-  padding-top: env(safe-area-inset-top, 20px);
+#settings-panel {
+  max-height: calc(85dvh - env(safe-area-inset-top, 20px));
 }
 
 input::-webkit-outer-spin-button,
