@@ -34,9 +34,6 @@ jobs:
       - name: Run E2E tests
         run: npm run test:e2e
 
-      - name: Build Tailwind CSS
-        run: npm run build:css
-
       - name: Generate service worker precache list
         run: node scripts/generate-sw.mjs
 
