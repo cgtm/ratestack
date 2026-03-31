@@ -3,6 +3,7 @@
  * `state.js` can import `numberLocale` / `t` without a circular import with the store.
  */
 import en from "./i18n/en.js";
+import af from "./i18n/af.js";
 import zh from "./i18n/zh.js";
 import hi from "./i18n/hi.js";
 import es from "./i18n/es.js";
@@ -24,10 +25,11 @@ export const LANGUAGES = {
   zh: { label: "中文", flag: "\u{1F1E8}\u{1F1F3}", numberLocale: "zh-CN" },
   hi: { label: "हिन्दी", flag: "\u{1F1EE}\u{1F1F3}", numberLocale: "hi-IN" },
   es: { label: "Español", flag: "\u{1F1EA}\u{1F1F8}", numberLocale: "es-ES" },
+  af: { label: "Afrikaans", flag: "\u{1F1FF}\u{1F1E6}", numberLocale: "af-ZA" },
   ja: { label: "日本語", flag: "\u{1F1EF}\u{1F1F5}", numberLocale: "ja-JP" },
 };
 
-const translations = { en, zh, hi, es, ko, ja };
+const translations = { en, ko, zh, hi, es, af, ja };
 
 export function t(key, params) {
   let str = translations[_lang]?.[key] ?? translations.en[key] ?? key;

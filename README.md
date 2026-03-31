@@ -14,7 +14,7 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 - **Offline support** — service worker caches the app and last-fetched rates
 - **Homescreen install** — add via Safari (iOS) or Chrome (Android) for a standalone, full-screen app experience
 - **10 themes** — five dark/light pairs: Default, Glowing, Arctic, Forest, and Ember; plus an Auto option that follows the OS preference
-- **6 languages** — English, Korean, Chinese (Mandarin), Hindi, Spanish, and Japanese, with locale-aware number formatting
+- **7 languages** — English, Korean, Chinese (Mandarin), Hindi, Spanish, Afrikaans, and Japanese, with locale-aware number formatting
 - **Native number formats** — tap the format icon on a card to switch between standard and native grouping (만/억 for CJK currencies; lakh/crore for South Asian currencies) — useful for copying a value to paste elsewhere
 - **Compact currency picker** — selected currencies shown as pills in settings, maximising space for browsing
 - **Settings saved automatically** — changes apply immediately; a Done button closes the panel

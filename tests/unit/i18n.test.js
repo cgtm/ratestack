@@ -16,7 +16,7 @@ beforeEach(() => setLang("en"));
 describe("LANGUAGES", () => {
   it("contains all supported language codes", () => {
     expect(Object.keys(LANGUAGES)).toEqual(
-      expect.arrayContaining(["en", "ko", "zh", "hi", "es", "ja"]),
+      expect.arrayContaining(["en", "af", "ko", "zh", "hi", "es", "ja"]),
     );
   });
 
