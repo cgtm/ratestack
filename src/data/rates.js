@@ -5,7 +5,7 @@
  * in its ECB-sourced set; falls back to open.er-api.com for exotic currencies.
  */
 
-const FRANKFURTER_BASE = "https://api.frankfurter.app/latest";
+const FRANKFURTER_BASE = "https://api.frankfurter.dev/v2/rates";
 const ER_API_BASE = "https://open.er-api.com/v6/latest";
 
 /**
@@ -57,14 +57,17 @@ export function usesFrankfurter(base, selectedCodes) {
 
 async function fetchFromFrankfurter(base, selectedCodes) {
   const targets = selectedCodes.filter((c) => c !== base);
-  const url = `${FRANKFURTER_BASE}?from=${base}&symbols=${targets.join(",")}`;
+  const url = `${FRANKFURTER_BASE}?base=${base}&quotes=${targets.join(",")}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
   const data = await res.json();
-  // Frankfurter returns { base, date, rates: { EUR: 0.92, ... } }
-  // base currency is not included in rates — matches fetchFromErApi's output shape
-  return data.rates;
+  // v2 returns an array: [{ base, quote, rate, date }, ...]
+  const rates = {};
+  for (const entry of data) {
+    rates[entry.quote] = entry.rate;
+  }
+  return rates;
 }
 
 async function fetchFromErApi(base, selectedCodes) {

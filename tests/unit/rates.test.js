@@ -74,10 +74,16 @@ describe("fetchRatesFromApi", () => {
     vi.unstubAllGlobals();
   });
 
-  function mockFrankfurterSuccess(rates) {
+  function mockFrankfurterSuccess(rates, base = "USD") {
     fetch.mockResolvedValue({
       ok: true,
-      json: async () => ({ base: "USD", date: "2026-01-01", rates }),
+      json: async () =>
+        Object.entries(rates).map(([quote, rate]) => ({
+          base,
+          quote,
+          rate,
+          date: "2026-01-01",
+        })),
     });
   }
 
@@ -98,19 +104,19 @@ describe("fetchRatesFromApi", () => {
     mockFrankfurterSuccess({ EUR: 0.92, GBP: 0.79 });
     await fetchRatesFromApi("USD", ["USD", "EUR", "GBP"]);
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("frankfurter.app"),
+      expect.stringContaining("frankfurter.dev"),
     );
   });
 
-  it("builds correct Frankfurter URL with from and symbols params", async () => {
+  it("builds correct Frankfurter URL with base and quotes params", async () => {
     mockFrankfurterSuccess({ EUR: 0.92, GBP: 0.79 });
     await fetchRatesFromApi("USD", ["USD", "EUR", "GBP"]);
     const url = fetch.mock.calls[0][0];
-    expect(url).toContain("from=USD");
+    expect(url).toContain("base=USD");
     expect(url).toContain("EUR");
     expect(url).toContain("GBP");
-    // base should not appear in symbols
-    expect(url.split("symbols=")[1]).not.toMatch(/\bUSD\b/);
+    // base should not appear in quotes
+    expect(url.split("quotes=")[1]).not.toMatch(/\bUSD\b/);
   });
 
   it("calls er-api when base is not in Frankfurter set", async () => {
