@@ -36,7 +36,9 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:all": "vitest run && playwright test"
+    "test:all": "vitest run && playwright test",
+    "deploy": "rsync -av index.html style.css manifest.json ../RateGaze/www/ && rsync -av --delete assets src ../RateGaze/www/ && node -e \"const v=require('./package.json').version;const fs=require('fs');const f='../RateGaze/www/index.html';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/>dev</,'>v'+v+'<'));\"",
+    "build:deploy": "npm run build && npm run deploy"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
