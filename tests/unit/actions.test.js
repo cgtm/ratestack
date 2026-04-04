@@ -53,7 +53,10 @@ beforeEach(() => {
 
 describe("refreshRates", () => {
   it("stores fetched rates on success", async () => {
-    fetchRatesFromApi.mockResolvedValue({ EUR: 0.92 });
+    fetchRatesFromApi.mockResolvedValue({
+      rates: { EUR: 0.92 },
+      source: "frankfurter",
+    });
 
     const result = await refreshRates();
 
@@ -61,6 +64,16 @@ describe("refreshRates", () => {
     expect(store.rates).toEqual({ USD: { EUR: 0.92 } });
     expect(store.ratesFetchError).toBe(false);
     expect(store.ratesLastSuccessAt).toBeTypeOf("number");
+    expect(store.ratesSource).toBe("frankfurter");
+  });
+
+  it("sets ratesSource to er-api when fallback was used", async () => {
+    fetchRatesFromApi.mockResolvedValue({
+      rates: { EUR: 0.92 },
+      source: "er-api",
+    });
+    await refreshRates();
+    expect(store.ratesSource).toBe("er-api");
   });
 
   it("sets ratesFetchError on failure", async () => {
@@ -93,7 +106,10 @@ describe("refreshRates", () => {
   });
 
   it("uses baseCurrency as the fetch base", async () => {
-    fetchRatesFromApi.mockResolvedValue({ USD: 1.09 });
+    fetchRatesFromApi.mockResolvedValue({
+      rates: { USD: 1.09 },
+      source: "frankfurter",
+    });
     store.baseCurrency = "EUR";
     store.selected = ["EUR", "USD"];
 
@@ -103,7 +119,10 @@ describe("refreshRates", () => {
   });
 
   it("falls back to first selected when baseCurrency is empty", async () => {
-    fetchRatesFromApi.mockResolvedValue({ EUR: 0.92 });
+    fetchRatesFromApi.mockResolvedValue({
+      rates: { EUR: 0.92 },
+      source: "frankfurter",
+    });
     store.baseCurrency = "";
     store.selected = ["USD", "EUR"];
 
@@ -114,7 +133,10 @@ describe("refreshRates", () => {
 
   it("replaces old rates (prunes stale base keys)", async () => {
     store.rates = { EUR: { USD: 1.09 } }; // stale from a previous base
-    fetchRatesFromApi.mockResolvedValue({ EUR: 0.92 });
+    fetchRatesFromApi.mockResolvedValue({
+      rates: { EUR: 0.92 },
+      source: "frankfurter",
+    });
 
     await refreshRates();
 
@@ -134,7 +156,10 @@ describe("refreshRatesIfNeeded", () => {
   });
 
   it("fetches when rates are missing", async () => {
-    fetchRatesFromApi.mockResolvedValue({ EUR: 0.92 });
+    fetchRatesFromApi.mockResolvedValue({
+      rates: { EUR: 0.92 },
+      source: "frankfurter",
+    });
     const result = await refreshRatesIfNeeded();
     expect(fetchRatesFromApi).toHaveBeenCalledOnce();
     expect(result.ok).toBe(true);
@@ -143,7 +168,10 @@ describe("refreshRatesIfNeeded", () => {
   it("fetches when only partial rates cached", async () => {
     store.selected = ["USD", "EUR", "GBP"];
     store.rates = { USD: { EUR: 0.92 } }; // GBP missing
-    fetchRatesFromApi.mockResolvedValue({ EUR: 0.92, GBP: 0.79 });
+    fetchRatesFromApi.mockResolvedValue({
+      rates: { EUR: 0.92, GBP: 0.79 },
+      source: "frankfurter",
+    });
 
     await refreshRatesIfNeeded();
 

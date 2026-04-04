@@ -25,13 +25,11 @@ export async function refreshRates() {
   if (!base || store.selected.length < 2) return { ok: false };
 
   try {
-    const rates = await fetchRatesFromApi(base, store.selected);
+    const { rates, source } = await fetchRatesFromApi(base, store.selected);
     store.rates = { [base]: rates };
     store.ratesLastSuccessAt = Date.now();
     store.ratesFetchError = false;
-    store.ratesSource = usesFrankfurter(base, store.selected)
-      ? "frankfurter"
-      : "er-api";
+    store.ratesSource = source;
     hapticSuccess();
     return { ok: true };
   } catch (err) {

@@ -95,12 +95,14 @@ async function fetchFromErApi(base, selectedCodes) {
 export async function fetchRatesFromApi(base, selectedCodes) {
   if (usesFrankfurter(base, selectedCodes)) {
     try {
-      return await fetchFromFrankfurter(base, selectedCodes);
+      const rates = await fetchFromFrankfurter(base, selectedCodes);
+      return { rates, source: "frankfurter" };
     } catch (err) {
       console.warn("Frankfurter unreachable, falling back to er-api:", err);
     }
   }
-  return fetchFromErApi(base, selectedCodes);
+  const rates = await fetchFromErApi(base, selectedCodes);
+  return { rates, source: "er-api" };
 }
 
 /**

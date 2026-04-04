@@ -129,33 +129,60 @@ describe("fetchRatesFromApi", () => {
 
   // ── response parsing ──────────────────────────────────────────────────────
 
-  it("returns rates from Frankfurter response", async () => {
+  it("returns rates and source:frankfurter from Frankfurter response", async () => {
     mockFrankfurterSuccess({ EUR: 0.92, GBP: 0.79 });
-    const result = await fetchRatesFromApi("USD", ["USD", "EUR", "GBP"]);
-    expect(result).toEqual({ EUR: 0.92, GBP: 0.79 });
+    const { rates, source } = await fetchRatesFromApi("USD", [
+      "USD",
+      "EUR",
+      "GBP",
+    ]);
+    expect(rates).toEqual({ EUR: 0.92, GBP: 0.79 });
+    expect(source).toBe("frankfurter");
   });
 
-  it("returns relevant rates from er-api response", async () => {
+  it("returns rates and source:er-api from er-api response", async () => {
     mockErApiSuccess({ EUR: 0.92, GBP: 0.79, AED: 3.67 });
-    const result = await fetchRatesFromApi("USD", ["USD", "EUR", "NGN"]);
-    expect(result.EUR).toBe(0.92);
-    expect(result.NGN).toBeUndefined(); // not in mock response
+    const { rates, source } = await fetchRatesFromApi("USD", [
+      "USD",
+      "EUR",
+      "NGN",
+    ]);
+    expect(rates.EUR).toBe(0.92);
+    expect(rates.NGN).toBeUndefined(); // not in mock response
+    expect(source).toBe("er-api");
   });
 
   it("excludes the base currency from er-api results", async () => {
     mockErApiSuccess({ USD: 1, EUR: 0.92 });
-    const result = await fetchRatesFromApi("USD", ["USD", "EUR", "NGN"]);
-    expect(result.USD).toBeUndefined();
-    expect(result.EUR).toBe(0.92);
+    const { rates } = await fetchRatesFromApi("USD", ["USD", "EUR", "NGN"]);
+    expect(rates.USD).toBeUndefined();
+    expect(rates.EUR).toBe(0.92);
   });
 
   // ── error handling ────────────────────────────────────────────────────────
 
-  it("throws on HTTP error from Frankfurter", async () => {
-    mockFetchHttpError(429);
-    await expect(fetchRatesFromApi("USD", ["USD", "EUR"])).rejects.toThrow(
-      "HTTP 429",
-    );
+  it("falls back to er-api when Frankfurter returns an HTTP error", async () => {
+    fetch
+      .mockResolvedValueOnce({ ok: false, status: 429 })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: "success", rates: { EUR: 0.92 } }),
+      });
+    const { rates, source } = await fetchRatesFromApi("USD", ["USD", "EUR"]);
+    expect(rates.EUR).toBe(0.92);
+    expect(source).toBe("er-api");
+  });
+
+  it("falls back to er-api when Frankfurter has a network failure", async () => {
+    fetch
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: "success", rates: { EUR: 0.92 } }),
+      });
+    const { rates, source } = await fetchRatesFromApi("USD", ["USD", "EUR"]);
+    expect(rates.EUR).toBe(0.92);
+    expect(source).toBe("er-api");
   });
 
   it("throws on HTTP error from er-api", async () => {
@@ -175,10 +202,10 @@ describe("fetchRatesFromApi", () => {
     ).rejects.toThrow("invalid-key");
   });
 
-  it("throws on network failure", async () => {
+  it("throws on network failure from er-api", async () => {
     fetch.mockRejectedValue(new TypeError("Failed to fetch"));
-    await expect(fetchRatesFromApi("USD", ["USD", "EUR"])).rejects.toThrow(
-      "Failed to fetch",
-    );
+    await expect(
+      fetchRatesFromApi("USD", ["USD", "EUR", "NGN"]),
+    ).rejects.toThrow("Failed to fetch");
   });
 });
