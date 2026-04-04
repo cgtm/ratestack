@@ -1,59 +1,12 @@
 /**
  * Pure exchange-rate fetching — no DOM access, no store mutations.
  *
- * Prefers Frankfurter (unlimited, no auth) when all selected currencies are
- * in its ECB-sourced set; falls back to open.er-api.com for exotic currencies.
+ * Prefers Frankfurter (160+ currencies, no auth) and falls back to
+ * open.er-api.com if Frankfurter is unreachable.
  */
 
 const FRANKFURTER_BASE = "https://api.frankfurter.dev/v2/rates";
 const ER_API_BASE = "https://open.er-api.com/v6/latest";
-
-/**
- * Currencies supported by Frankfurter (ECB data, ~32 major currencies).
- * https://frankfurter.dev/
- */
-const FRANKFURTER_CURRENCIES = new Set([
-  "AUD",
-  "BGN",
-  "BRL",
-  "CAD",
-  "CHF",
-  "CNY",
-  "CZK",
-  "DKK",
-  "EUR",
-  "GBP",
-  "HKD",
-  "HUF",
-  "IDR",
-  "ILS",
-  "INR",
-  "ISK",
-  "JPY",
-  "KRW",
-  "MXN",
-  "MYR",
-  "NOK",
-  "NZD",
-  "PHP",
-  "PLN",
-  "RON",
-  "SEK",
-  "SGD",
-  "THB",
-  "TRY",
-  "USD",
-  "ZAR",
-]);
-
-/**
- * True when Frankfurter can serve all of the requested currencies.
- * Exported for testing.
- */
-export function usesFrankfurter(base, selectedCodes) {
-  if (!FRANKFURTER_CURRENCIES.has(base)) return false;
-  return selectedCodes.every((c) => FRANKFURTER_CURRENCIES.has(c));
-}
 
 async function fetchFromFrankfurter(base, selectedCodes) {
   const targets = selectedCodes.filter((c) => c !== base);
@@ -89,20 +42,17 @@ async function fetchFromErApi(base, selectedCodes) {
 }
 
 /**
- * Fetch cross-rates for `base` from the best available API.
- * Uses Frankfurter when all currencies are in its ECB set; falls back to er-api.
+ * Fetch cross-rates for `base`, preferring Frankfurter with er-api as fallback.
  * @param {string} base - Base currency code (e.g. "USD")
  * @param {string[]} selectedCodes - All selected currency codes
- * @returns {Promise<Record<string, number>>} Rates keyed by target currency
+ * @returns {Promise<{ rates: Record<string, number>, source: string }>}
  */
 export async function fetchRatesFromApi(base, selectedCodes) {
-  if (usesFrankfurter(base, selectedCodes)) {
-    try {
-      const rates = await fetchFromFrankfurter(base, selectedCodes);
-      return { rates, source: "frankfurter" };
-    } catch (err) {
-      console.warn("Frankfurter unreachable, falling back to er-api:", err);
-    }
+  try {
+    const rates = await fetchFromFrankfurter(base, selectedCodes);
+    return { rates, source: "frankfurter" };
+  } catch (err) {
+    console.warn("Frankfurter unreachable, falling back to er-api:", err);
   }
   const rates = await fetchFromErApi(base, selectedCodes);
   return { rates, source: "er-api" };

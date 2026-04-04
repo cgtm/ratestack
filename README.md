@@ -10,7 +10,7 @@ A fast, minimal currency converter designed for mobile homescreens. Built as a P
 - **2–5 currencies** — pick your own set from 60+ currencies across 10 regions
 - **Drag to reorder** — hold the grip handle to rearrange cards
 - **Swipe to remove** — swipe a card left to remove it from your set
-- **Live exchange rates** — fetched from [Frankfurter](https://frankfurter.dev) (ECB data, no auth) for major currencies, with automatic fallback to [ExchangeRate-API](https://www.exchangerate-api.com) for exotic currencies; refreshable on demand
+- **Live exchange rates** — fetched from [Frankfurter](https://frankfurter.dev) (160+ currencies, no auth, no limits) with automatic fallback to [ExchangeRate-API](https://www.exchangerate-api.com) if unreachable; refreshable on demand
 - **Offline support** — service worker caches the app and last-fetched rates
 - **Homescreen install** — add via Safari (iOS) or Chrome (Android) for a standalone, full-screen app experience
 - **10 themes** — five dark/light pairs: Default, Glowing, Arctic, Forest, and Ember; plus an Auto option that follows the OS preference
@@ -69,7 +69,7 @@ src/
   data/
     store.js                Shared state object and localStorage persistence
     numbers.js              Number parsing, formatting, conversion math (cached Intl formatters)
-    rates.js                Rate fetching — Frankfurter for ECB currencies, er-api fallback
+    rates.js                Rate fetching — Frankfurter (primary), er-api fallback
     native-format.js        Native number grouping (CJK 万/億, South Asian lakh/crore)
 
   ui/

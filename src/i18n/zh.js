@@ -77,7 +77,6 @@ export default {
   "currency.CZK": "捷克克朗",
   "currency.HUF": "匈牙利福林",
   "currency.RON": "罗马尼亚列伊",
-  "currency.BGN": "保加利亚列弗",
   "currency.ISK": "冰岛克朗",
   "currency.RSD": "塞尔维亚第纳尔",
   "currency.RUB": "俄罗斯卢布",
