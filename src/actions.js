@@ -48,10 +48,14 @@ export async function refreshRates() {
 export async function refreshRatesIfNeeded() {
   const base = store.baseCurrency || store.selected[0];
   if (!base || store.selected.length < 2) return { ok: false };
-  if (hasCompleteRates(base, store.selected, store.rates)) {
-    store.ratesSource = usesFrankfurter(base, store.selected)
-      ? "frankfurter"
-      : "er-api";
+  const expectedSource = usesFrankfurter(base, store.selected)
+    ? "frankfurter"
+    : "er-api";
+  if (
+    hasCompleteRates(base, store.selected, store.rates) &&
+    expectedSource === store.ratesSource
+  ) {
+    store.ratesSource = expectedSource;
     return { ok: true, cached: true };
   }
   return refreshRates();

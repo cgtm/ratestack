@@ -1,8 +1,8 @@
-/**
- * Short vibration pulses where `navigator.vibrate` exists (mostly Android PWA / Chrome).
- * iOS Safari does not expose Vibration API — calls are no-ops there.
- */
-export function haptic(ms = 12) {
+function capHaptics() {
+  return window.Capacitor?.Plugins?.Haptics;
+}
+
+function vibrateMs(ms) {
   if (
     typeof navigator !== "undefined" &&
     typeof navigator.vibrate === "function"
@@ -11,10 +11,35 @@ export function haptic(ms = 12) {
   }
 }
 
+/**
+ * Short vibration pulses.
+ * Uses Capacitor Haptics plugin when available (native iOS/Android via RateGaze),
+ * falls back to Vibration API (Android PWA / Chrome).
+ * iOS Safari PWA: no-op on both paths.
+ */
+export function haptic(ms = 12) {
+  const h = capHaptics();
+  if (h) {
+    h.impact({ style: "LIGHT" });
+  } else {
+    vibrateMs(ms);
+  }
+}
+
 export function hapticSuccess() {
-  haptic(15);
+  const h = capHaptics();
+  if (h) {
+    h.notification({ type: "SUCCESS" });
+  } else {
+    vibrateMs(15);
+  }
 }
 
 export function hapticCommit() {
-  haptic(20);
+  const h = capHaptics();
+  if (h) {
+    h.impact({ style: "MEDIUM" });
+  } else {
+    vibrateMs(20);
+  }
 }

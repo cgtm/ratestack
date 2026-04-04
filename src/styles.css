@@ -16,6 +16,10 @@
   --shadow-accent-glow: 0 0 0 3px var(--color-accent-glow);
 }
 
+html {
+  font-size: 16px;
+}
+
 body {
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);

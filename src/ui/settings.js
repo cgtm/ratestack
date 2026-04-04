@@ -6,7 +6,11 @@ import { store, hasMinimumCurrencies } from "../data/store.js";
 import { refreshRates } from "../actions.js";
 import { t } from "../i18n.js";
 import { syncShellLabels } from "./shell.js";
-import { updateTimestamp, updateDisclaimerUI } from "./status.js";
+import {
+  updateTimestamp,
+  updateDisclaimerUI,
+  updateRateStatusUI,
+} from "./status.js";
 import { renderConverter, renderEmptyState } from "./converter.js";
 import { renderLanguagePicker, renderThemePicker } from "./dropdowns.js";
 import {
@@ -110,6 +114,8 @@ function applyAfterClose(snapshot) {
       store.baseAmount = "";
       refreshRates().then(() => {
         renderConverter();
+        updateRateStatusUI();
+        updateTimestamp();
         updateDisclaimerUI();
       });
     } else if (langChanged) {
