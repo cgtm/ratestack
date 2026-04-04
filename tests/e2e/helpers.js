@@ -29,22 +29,21 @@ export const MOCK_RATES_EUR = {
 export async function mockRatesApi(page, ratesByBase = {}) {
   const ratesMap = { ...ALL_RATES, ...ratesByBase };
 
-  // Frankfurter: GET /latest?from=USD&symbols=EUR,GBP
-  await page.route(/frankfurter\.app/, (route) => {
+  // Frankfurter: GET /v2/rates?base=USD&quotes=EUR,GBP
+  await page.route(/frankfurter\.dev/, (route) => {
     const url = new URL(route.request().url());
-    const base = (url.searchParams.get("from") || "USD").toUpperCase();
-    const symbols = (url.searchParams.get("symbols") || "")
+    const base = (url.searchParams.get("base") || "USD").toUpperCase();
+    const quotes = (url.searchParams.get("quotes") || "")
       .split(",")
       .filter(Boolean);
     const allRates = ratesMap[base] ?? ratesMap.USD;
-    const rates = {};
-    for (const s of symbols) {
-      if (allRates[s] !== undefined) rates[s] = allRates[s];
-    }
+    const body = quotes
+      .filter((q) => allRates[q] !== undefined)
+      .map((q) => ({ base, quote: q, rate: allRates[q], date: "2026-01-01" }));
     route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ base, date: "2026-01-01", rates }),
+      body: JSON.stringify(body),
     });
   });
 

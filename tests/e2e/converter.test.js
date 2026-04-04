@@ -22,7 +22,7 @@ test.describe("Converter", () => {
     // Delay the API response so the loading skeleton is observable
     const delay = (route) =>
       new Promise((r) => setTimeout(r, 600)).then(() => route.fallback());
-    await page.route(/frankfurter\.app/, delay);
+    await page.route(/frankfurter\.dev/, delay);
     await page.route("**/open.er-api.com/**", delay);
 
     await openWithCurrencies(page, ["USD", "EUR"]);
@@ -235,7 +235,7 @@ test.describe("Converter", () => {
 
     // Slow down the next API response so we can observe the spinner
     const delay = (route) => setTimeout(() => route.fallback(), 500);
-    await page.route(/frankfurter\.app/, delay);
+    await page.route(/frankfurter\.dev/, delay);
     await page.route("**/open.er-api.com/**", delay);
 
     const refreshBtn = page.locator("#refresh-btn");

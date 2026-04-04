@@ -45,7 +45,7 @@ test.describe("Offline behaviour", () => {
     // Override both APIs to return a 500
     const fail500 = (route) =>
       route.fulfill({ status: 500, body: "Internal Server Error" });
-    await page.route(/frankfurter\.app/, fail500);
+    await page.route(/frankfurter\.dev/, fail500);
     await page.route("**/open.er-api.com/**", fail500);
     await openWithCurrencies(page, ["USD", "EUR"]);
 
