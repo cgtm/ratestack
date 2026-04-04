@@ -17,7 +17,7 @@ export const CURRENCY_REGIONS = [
       "CZK",
       "HUF",
       "RON",
-      "BGN",
+
       "ISK",
       "RSD",
       "RUB",
@@ -81,11 +81,7 @@ export const CURRENCIES = {
   CZK: { flag: "\u{1F1E8}\u{1F1FF}", name: "Czech Koruna", symbol: "K\u010D" },
   HUF: { flag: "\u{1F1ED}\u{1F1FA}", name: "Hungarian Forint", symbol: "Ft" },
   RON: { flag: "\u{1F1F7}\u{1F1F4}", name: "Romanian Leu", symbol: "lei" },
-  BGN: {
-    flag: "\u{1F1E7}\u{1F1EC}",
-    name: "Bulgarian Lev",
-    symbol: "\u043B\u0432",
-  },
+
   ISK: {
     flag: "\u{1F1EE}\u{1F1F8}",
     name: "Icelandic Kr\u00F3na",

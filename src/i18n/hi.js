@@ -78,7 +78,6 @@ export default {
   "currency.CZK": "चेक कोरुना",
   "currency.HUF": "हंगेरियन फ़ोरिंट",
   "currency.RON": "रोमानियाई ल्यू",
-  "currency.BGN": "बल्गेरियाई लेव",
   "currency.ISK": "आइसलैंडिक क्रोना",
   "currency.RSD": "सर्बियन दिनार",
   "currency.RUB": "रूसी रूबल",

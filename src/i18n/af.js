@@ -79,7 +79,6 @@ export default {
   "currency.CZK": "Tsjeggiese koruna",
   "currency.HUF": "Hongaarse forint",
   "currency.RON": "Roemeense leu",
-  "currency.BGN": "Bulgaarse lev",
   "currency.ISK": "Yslandse króna",
   "currency.RSD": "Serwiese dinar",
   "currency.RUB": "Russiese roebel",

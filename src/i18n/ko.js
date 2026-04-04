@@ -79,7 +79,6 @@ export default {
   "currency.CZK": "체코 코루나",
   "currency.HUF": "헝가리 포린트",
   "currency.RON": "루마니아 레우",
-  "currency.BGN": "불가리아 레프",
   "currency.ISK": "아이슬란드 크로나",
   "currency.RSD": "세르비아 디나르",
   "currency.RUB": "러시아 루블",
